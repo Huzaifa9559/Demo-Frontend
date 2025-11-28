@@ -17,8 +17,8 @@
       "@components/*": ["src/components/*"],
       "@constants": ["src/constants"],
       "@constants/*": ["src/constants/*"],
-      "@data": ["src/data"],
-      "@data/*": ["src/data/*"],
+      "@data": ["src/mocks/data"],
+      "@data/*": ["src/mocks/data/*"],
       "@validators": ["src/validators"],
       "@validators/*": ["src/validators/*"],
       "@services": ["src/services"],
@@ -27,6 +27,14 @@
       "@hooks/*": ["src/hooks/*"],
       "@pages": ["src/pages"],
       "@pages/*": ["src/pages/*"],
+      "@routes": ["src/routes"],
+      "@routes/*": ["src/routes/*"],
+      "@utils": ["src/utils"],
+      "@utils/*": ["src/utils/*"],
+      "@providers": ["src/providers"],
+      "@providers/*": ["src/providers/*"],
+      "@mocks": ["src/mocks"],
+      "@mocks/*": ["src/mocks/*"],
       "@": ["src"],
       "@/*": ["src/*"]
     }
@@ -34,4 +42,3 @@
   "include": ["src"],
   "exclude": ["src/**/*.test.*"]
 }
-

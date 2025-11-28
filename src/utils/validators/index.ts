@@ -1,0 +1,1 @@
+export { default as FormValidator } from './form-validator';
