@@ -12,11 +12,11 @@ export const AppSidebar = ({
   setActiveTab,
   sideBarTabs,
 }: AppSidebarProps) => {
-  const { navigate } = useNavigation();
+  const { goTo } = useNavigation();
 
   const handleTabClick = (tab: SideBarTab) => {
     setActiveTab(tab);
-    navigate(tab.url);
+    goTo(tab.url);
   };
 
   return (
