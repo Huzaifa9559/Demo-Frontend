@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import type { TablePaginationConfig, TableProps } from "antd";
 import type { ProjectRecord } from "@/types";
 import { type RangeFilter, type StatusFilter } from "@utils";
@@ -28,40 +28,39 @@ export const useProjectFilters = ({
   const [pagination, setPagination] =
     useState<TablePaginationConfig>(initialPagination);
 
-  const handleSearchChange = useCallback((value: string) => {
+  const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     setPagination((prev) => ({ ...prev, current: 1 }));
-  }, []);
+  };
 
-  const handleStatusChange = useCallback((value: StatusFilter) => {
+  const handleStatusChange = (value: StatusFilter) => {
     setStatusFilter(value);
     setPagination((prev) => ({ ...prev, current: 1 }));
-  }, []);
+  };
 
-  const handleRangeChange = useCallback((value: RangeFilter) => {
+  const handleRangeChange = (value: RangeFilter) => {
     setRangeFilter(value);
     setPagination((prev) => ({ ...prev, current: 1 }));
-  }, []);
+  };
 
-  const handleTableChange = useCallback(
-    (nextPagination: TablePaginationConfig | undefined) => {
-      if (nextPagination) {
-        setPagination((prev) => ({
-          ...prev,
-          current: nextPagination.current ?? prev.current,
-          pageSize: nextPagination.pageSize ?? prev.pageSize,
-        }));
-      }
-    },
-    []
-  ) as TableProps<ProjectRecord>["onChange"];
+  const handleTableChange: TableProps<ProjectRecord>["onChange"] = (
+    nextPagination
+  ) => {
+    if (nextPagination) {
+      setPagination((prev) => ({
+        ...prev,
+        current: nextPagination.current ?? prev.current,
+        pageSize: nextPagination.pageSize ?? prev.pageSize,
+      }));
+    }
+  };
 
-  const resetFilters = useCallback(() => {
+  const resetFilters = () => {
     setSearchTerm(initialSearch);
     setStatusFilter(initialStatus);
     setRangeFilter(initialRange);
     setPagination(initialPagination);
-  }, [initialSearch, initialStatus, initialRange, initialPagination]);
+  };
 
   return {
     searchTerm,

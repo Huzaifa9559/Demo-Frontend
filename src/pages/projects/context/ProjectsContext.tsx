@@ -2,7 +2,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import type { TablePaginationConfig, TableProps } from "antd";
 import type { ProjectRecord } from "@/types";
 import type { RangeFilter, StatusFilter } from "@utils";
-import type { ProjectFormValues } from "../components/ProjectFormModal";
+import type { ProjectFormValues } from "../components/ProjectCreateModal";
 import type { ModalProps, HeaderProps } from "@components/ui";
 
 export type ProjectsLayoutConfig = {
@@ -16,13 +16,14 @@ export type ProjectsContextValue = {
   filteredProjects: ProjectRecord[];
   statusColors: Record<ProjectRecord["status"], string>;
   isLoading: boolean;
-  searchValue: string;
-  statusValue: StatusFilter;
-  rangeValue: RangeFilter;
+  searchTerm: string;
+  statusFilter: StatusFilter;
+  rangeFilter: RangeFilter;
   pagination: TablePaginationConfig;
-  onSearchChange: (value: string) => void;
-  onStatusChange: (value: StatusFilter) => void;
-  onRangeChange: (value: RangeFilter) => void;
+  handleSearchChange: (value: string) => void;
+  handleStatusChange: (value: StatusFilter) => void;
+  handleRangeChange: (value: RangeFilter) => void;
+  handleTableChange: TableProps<ProjectRecord>["onChange"];
   onTableChange: TableProps<ProjectRecord>["onChange"];
   openCreateForm: () => void;
   openEditForm: (project: ProjectRecord) => void;

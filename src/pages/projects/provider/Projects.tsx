@@ -1,12 +1,11 @@
-import { type FC, type ReactNode, useMemo, type ComponentType } from "react";
-import type { TableProps } from "antd";
+import { type ReactNode } from "react";
 import { Button } from "@components/ui";
 import { PlusOutlined } from "@ant-design/icons";
 import {
   ProjectsContextProvider,
   type ProjectsContextValue,
+  type ProjectsLayoutConfig,
 } from "../context/ProjectsContext";
-import type { ProjectsLayoutConfig } from "../context/ProjectsContext";
 import { PROJECT_STATUS_COLORS } from "@/types";
 import { useGetProjects } from "@services";
 import {
@@ -16,145 +15,95 @@ import {
   useProjectForm,
   useProjectHeader,
 } from "@hooks";
-// Import directly from files to avoid circular dependency through index
 import { ProjectsHeader } from "../components/ProjectsHeader";
-import { ProjectsCard } from "../components/ProjectsCard";
 import { ProjectFilters } from "../components/ProjectFilters";
 import { ProjectTable } from "../components/ProjectTable";
-import { ProjectDetailsModal } from "../components/ProjectDetailsModal";
-import { ProjectFormModal } from "../components/ProjectFormModal";
+import { ProjectViewModal } from "../components/ProjectViewModal";
+import { ProjectCreateModal } from "../components/ProjectCreateModal";
+import { ProjectEditModal } from "../components/ProjectEditModal";
 
 type ProjectsProviderProps = {
   children: ReactNode;
   layout?: ProjectsLayoutConfig;
 };
 
-const ProjectsProvider = ({ children, layout }: ProjectsProviderProps) => {
-  // Filter state management
-  const {
-    searchTerm,
-    statusFilter,
-    rangeFilter,
-    pagination,
-    handleSearchChange,
-    handleStatusChange,
-    handleRangeChange,
-    handleTableChange,
-  } = useProjectFilters();
-
-  // Modal state management
-  const {
-    selectedProject,
-    isDetailsOpen,
-    isFormOpen,
-    formMode,
-    openDetails,
-    closeDetails,
-    openCreateForm,
-    openEditForm,
-    closeForm,
-  } = useProjectModals();
+function Projects({ children, layout }: ProjectsProviderProps) {
+  // State management
+  const filters = useProjectFilters();
+  const modals = useProjectModals();
 
   // Fetch projects
   const { data: projects = [], isLoading } = useGetProjects({
-    search: searchTerm || undefined,
-    status: statusFilter !== "all" ? statusFilter : undefined,
-    range: rangeFilter,
+    search: filters.searchTerm || undefined,
+    status: filters.statusFilter !== "all" ? filters.statusFilter : undefined,
+    range: filters.rangeFilter,
   });
 
   // Filter projects
   const { filteredProjects } = useProjectFiltering({
     projects,
-    searchTerm,
-    statusFilter,
-    rangeFilter,
+    searchTerm: filters.searchTerm,
+    statusFilter: filters.statusFilter,
+    rangeFilter: filters.rangeFilter,
   });
 
   // Form submission
   const { handleFormSubmit } = useProjectForm({
-    selectedProject,
-    formMode,
-    onSuccess: closeForm,
+    selectedProject: modals.selectedProject,
+    formMode: modals.formMode,
+    onSuccess: modals.closeForm,
   });
 
-  // Header props
-  const defaultActions = useMemo(
-    () => (
-      <Button type="primary" icon={<PlusOutlined />} onClick={openCreateForm}>
-        New Project
-      </Button>
-    ),
-    [openCreateForm]
+  // Header actions
+  const defaultActions = (
+    <Button type="primary" icon={<PlusOutlined />} onClick={modals.openCreateForm}>
+      New Project
+    </Button>
   );
 
   const { headerProps } = useProjectHeader({
     projectsCount: projects.length,
-    rangeFilter,
+    rangeFilter: filters.rangeFilter,
     layout,
     defaultActions,
   });
 
-  const contextValue: ProjectsContextValue = useMemo(
-    () => ({
-      projects,
-      filteredProjects,
-      statusColors: PROJECT_STATUS_COLORS,
-      isLoading,
-      searchValue: searchTerm,
-      statusValue: statusFilter,
-      rangeValue: rangeFilter,
-      pagination,
-      onSearchChange: handleSearchChange,
-      onStatusChange: handleStatusChange,
-      onRangeChange: handleRangeChange,
-      onTableChange: handleTableChange,
-      openCreateForm,
-      openEditForm,
-      openDetails,
-      closeDetails,
-      isFormOpen,
-      isDetailsOpen,
-      formMode,
-      selectedProject,
-      handleFormSubmit,
-      closeForm,
-      detailsModalProps: {
-        open: isDetailsOpen,
-        title: "Project details",
-        onCancel: closeDetails,
-        onOk: closeDetails,
-        okText: "Close",
-        cancelButtonProps: { style: { display: "none" } },
-      },
-      headerProps,
-      layout,
-    }),
-    [
-      projects,
-      filteredProjects,
-      isLoading,
-      searchTerm,
-      statusFilter,
-      rangeFilter,
-      pagination,
-      handleSearchChange,
-      handleStatusChange,
-      handleRangeChange,
-      handleTableChange,
-      openCreateForm,
-      openEditForm,
-      openDetails,
-      closeDetails,
-      isFormOpen,
-      isDetailsOpen,
-      formMode,
-      selectedProject,
-      handleFormSubmit,
-      closeForm,
-      headerProps,
-      layout,
-    ]
-  );
+  // Context value
+  const contextValue: ProjectsContextValue = {
+    projects,
+    filteredProjects,
+    statusColors: PROJECT_STATUS_COLORS,
+    isLoading,
+    searchTerm: filters.searchTerm,
+    statusFilter: filters.statusFilter,
+    rangeFilter: filters.rangeFilter,
+    pagination: filters.pagination,
+    handleSearchChange: filters.handleSearchChange,
+    handleStatusChange: filters.handleStatusChange,
+    handleRangeChange: filters.handleRangeChange,
+    handleTableChange: filters.handleTableChange,
+    onTableChange: filters.handleTableChange,
+    openCreateForm: modals.openCreateForm,
+    openEditForm: modals.openEditForm,
+    openDetails: modals.openDetails,
+    closeDetails: modals.closeDetails,
+    isFormOpen: modals.isFormOpen,
+    isDetailsOpen: modals.isDetailsOpen,
+    formMode: modals.formMode,
+    selectedProject: modals.selectedProject,
+    handleFormSubmit,
+    closeForm: modals.closeForm,
+    detailsModalProps: {
+      open: modals.isDetailsOpen,
+      title: "Project details",
+      onCancel: modals.closeDetails,
+      onOk: modals.closeDetails,
+      okText: "Close",
+      cancelButtonProps: { style: { display: "none" } },
+    },
+    headerProps,
+    layout,
+  };
 
   return (
     <ProjectsContextProvider value={contextValue}>
@@ -163,26 +112,12 @@ const ProjectsProvider = ({ children, layout }: ProjectsProviderProps) => {
   );
 };
 
-// Create compound component - use ComponentType to avoid typeof initialization issues
-// ProjectFilters is a compound component with sub-components
-const Projects = ProjectsProvider as typeof ProjectsProvider & {
-  Header: ComponentType<any>;
-  Card: ComponentType<any>;
-  Filters: typeof ProjectFilters;
-  Table: ComponentType<any>;
-  DetailsModal: ComponentType<any>;
-  FormModal: ComponentType<any>;
-};
-
-// Attach sub-components to create compound component pattern
-// Use IIFE to ensure assignment happens after all modules are initialized
-(() => {
-  Projects.Header = ProjectsHeader;
-  Projects.Card = ProjectsCard;
-  Projects.Filters = ProjectFilters;
-  Projects.Table = ProjectTable;
-  Projects.DetailsModal = ProjectDetailsModal;
-  Projects.FormModal = ProjectFormModal;
-})();
+// Attach sub-components for compound component pattern
+Projects.Header = ProjectsHeader;
+Projects.Filters = ProjectFilters;
+Projects.Table = ProjectTable;
+Projects.ViewModal = ProjectViewModal;
+Projects.CreateModal = ProjectCreateModal;
+Projects.EditModal = ProjectEditModal;
 
 export { Projects };

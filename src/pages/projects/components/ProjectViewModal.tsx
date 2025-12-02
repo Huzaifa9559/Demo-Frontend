@@ -2,13 +2,13 @@ import { Descriptions, Tag } from "antd";
 import { Modal } from "@components/ui";
 import { useProjectsContext } from "../context";
 
-type ProjectDetailsModalProps = {
+type ProjectViewModalProps = {
   className?: string;
 };
 
-export const ProjectDetailsModal = ({
+export const ProjectViewModal = ({
   className,
-}: ProjectDetailsModalProps = {}) => {
+}: ProjectViewModalProps = {}) => {
   const { selectedProject, detailsModalProps } = useProjectsContext();
 
   return (
@@ -42,3 +42,4 @@ export const ProjectDetailsModal = ({
     </Modal>
   );
 };
+

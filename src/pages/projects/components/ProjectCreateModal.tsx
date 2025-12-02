@@ -1,45 +1,39 @@
 import { DatePicker, Input, InputNumber, Select } from "antd";
 import { Modal } from "@components/ui";
-import dayjs, { type Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { useFormik } from "formik";
 import { FormValidator, FormInitials } from "@utils";
-import type { ProjectRecord } from "@/types";
 import { useProjectsContext } from "../context/ProjectsContext";
 import { useEffect } from "react";
 
-export type ProjectFormValues = {
-  name: string;
-  projectCode: string;
-  owner: string;
-  status: ProjectRecord["status"];
-  dueDate: Dayjs | null;
-  tickets: number;
-};
 
-type ProjectFormModalProps = {
+import type { ProjectRecord } from "@/types";
+export type ProjectFormValues = {
+    name: string;
+    projectCode: string;
+    owner: string;
+    status: ProjectRecord["status"];
+    dueDate: Dayjs | null;
+    tickets: number;
+  };
+  
+type ProjectCreateModalProps = {
   className?: string;
 };
 
-export const ProjectFormModal = ({ className }: ProjectFormModalProps = {}) => {
-  const { isFormOpen, formMode, selectedProject, handleFormSubmit, closeForm } =
+export const ProjectCreateModal = ({
+  className,
+}: ProjectCreateModalProps = {}) => {
+  const { isFormOpen, formMode, handleFormSubmit, closeForm } =
     useProjectsContext();
 
-  const getInitialValues = () => {
-    if (selectedProject && formMode === "edit") {
-      return {
-        ...FormInitials.projectFormInitials(selectedProject),
-        dueDate: dayjs(selectedProject.dueDate, "MMM D, YYYY"),
-      };
-    }
-    return FormInitials.projectFormInitials();
-  };
+  const isOpen = isFormOpen && formMode === "create";
 
   const formik = useFormik<ProjectFormValues>({
-    initialValues: getInitialValues(),
+    initialValues: FormInitials.projectFormInitials(),
     validationSchema: FormValidator.projectFormValidationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      // Convert Dayjs to the format expected by handleFormSubmit
       const formattedValues = {
         ...values,
         dueDate: values.dueDate ? values.dueDate : dayjs(),
@@ -50,17 +44,10 @@ export const ProjectFormModal = ({ className }: ProjectFormModalProps = {}) => {
   });
 
   useEffect(() => {
-    if (isFormOpen) {
-      if (selectedProject && formMode === "edit") {
-        formik.setValues({
-          ...FormInitials.projectFormInitials(selectedProject),
-          dueDate: dayjs(selectedProject.dueDate, "MMM D, YYYY"),
-        });
-      } else {
-        formik.setValues(FormInitials.projectFormInitials());
-      }
+    if (isOpen) {
+      formik.setValues(FormInitials.projectFormInitials());
     }
-  }, [isFormOpen, selectedProject, formMode]);
+  }, [isOpen]);
 
   const handleOk = async () => {
     await formik.submitForm();
@@ -71,7 +58,6 @@ export const ProjectFormModal = ({ className }: ProjectFormModalProps = {}) => {
     closeForm();
   };
 
-  // Map filter status values to project status values
   const statusOptions = [
     { label: "In Progress", value: "In Progress" },
     { label: "On Hold", value: "On Hold" },
@@ -81,11 +67,11 @@ export const ProjectFormModal = ({ className }: ProjectFormModalProps = {}) => {
 
   return (
     <Modal
-      open={isFormOpen}
-      title={formMode === "create" ? "Create new project" : "Edit project"}
+      open={isOpen}
+      title="Create new project"
       onCancel={handleCancel}
       onOk={handleOk}
-      okText={formMode === "create" ? "Create" : "Save changes"}
+      okText="Create"
       className={className}
       afterClose={() => {
         formik.resetForm();
@@ -233,3 +219,4 @@ export const ProjectFormModal = ({ className }: ProjectFormModalProps = {}) => {
     </Modal>
   );
 };
+
