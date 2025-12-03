@@ -11,11 +11,10 @@ import type { ProjectRecord } from "@/types";
 import { useProjectsContext } from "../context/ProjectsContext";
 
 type ProjectTableProps = {
-  pagination?: TablePaginationConfig;
   className?: string;
 };
 
-export const ProjectTable = ({ pagination, className }: ProjectTableProps) => {
+export const ProjectTable = ({ className }: ProjectTableProps) => {
   const {
     filteredProjects,
     statusColors,
@@ -23,7 +22,14 @@ export const ProjectTable = ({ pagination, className }: ProjectTableProps) => {
     openDetails,
     openEditForm,
     isLoading,
+    pagination,
   } = useProjectsContext();
+
+  const tablePagination = {
+    ...pagination,
+    total: pagination.total ?? filteredProjects.length,
+  };
+
 
   const columns: TableProps<ProjectRecord>["columns"] = useMemo(
     () => [
@@ -121,7 +127,7 @@ export const ProjectTable = ({ pagination, className }: ProjectTableProps) => {
       columns={columns}
       dataSource={filteredProjects}
       loading={isLoading}
-      pagination={pagination}
+      pagination={tablePagination}
       className={className}
       onChange={onTableChange}
     />

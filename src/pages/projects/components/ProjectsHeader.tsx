@@ -7,5 +7,22 @@ type ProjectsHeaderProps = {
 export const ProjectsHeader = ({ className }: ProjectsHeaderProps) => {
   const { headerProps } = useProjectsContext();
 
-  return <Header {...headerProps} className={className} />;
+  return (
+    <Header className={className}>
+      <Header.Content>
+        {headerProps.label && (
+          <Header.Label>{headerProps.label}</Header.Label>
+        )}
+        <Header.Title>{headerProps.title}</Header.Title>
+        {(headerProps.subtitle || headerProps.subtitleSuffix) && (
+          <Header.Subtitle suffix={headerProps.subtitleSuffix}>
+            {headerProps.subtitle}
+          </Header.Subtitle>
+        )}
+      </Header.Content>
+      {headerProps.actions && (
+        <Header.Actions>{headerProps.actions}</Header.Actions>
+      )}
+    </Header>
+  );
 };

@@ -1,4 +1,3 @@
-import { ProjectListing } from "./components";
 import { Projects } from "./provider";
 
 export const ProjectsScreen = () => {
@@ -9,9 +8,12 @@ export const ProjectsScreen = () => {
           headerTitle: "Active projects",
         }}
       >
-        <ProjectListing />
-        <Projects.DetailsModal />
-        <Projects.FormModal />
+        <Projects.Header />
+        <Projects.Filters />
+        <Projects.Table />
+        <Projects.ViewModal />
+        <Projects.CreateModal />
+        <Projects.EditModal />
       </Projects>
     </div>
   );
