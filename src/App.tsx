@@ -2,6 +2,8 @@ import { Toaster } from "sonner";
 import { AppRouter } from "@routes";
 import { useEffect, useState } from "react";
 import { ReactQueryProvider } from "@providers";
+import { Provider } from "react-redux";
+import { store } from "@/store";
 
 async function enableMocking() {
   if (import.meta.env.DEV) {
@@ -26,10 +28,12 @@ function App() {
   }
 
   return (
-    <ReactQueryProvider>
-      <Toaster position="top-right" />
-      <AppRouter />
-    </ReactQueryProvider>
+    <Provider store={store}>
+      <ReactQueryProvider>
+        <Toaster position="top-right" />
+        <AppRouter />
+      </ReactQueryProvider>
+    </Provider>
   );
 }
 

@@ -37,5 +37,5 @@ export const RANGE_OPTIONS = [
   { label: "This Quarter", value: "quarter" },
 ] as const;
 
-export const SOMETHING_WENT_WRONG = "Something went wrong";
-export const UNABLE_TO_FIND = "Unable to find";
+export const SOMETHING_WENT_WRONG = "An unexpected error occurred. Please try again later.";
+export const UNABLE_TO_FIND = "The requested resource could not be found. Please verify your information and try again.";

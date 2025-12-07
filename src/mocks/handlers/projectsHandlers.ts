@@ -4,6 +4,7 @@ import { PROJECT_ROWS } from "@/mocks/data/projects";
 import { RangeFilter, StatusFilter } from "@utils";
 import type { ProjectRecord } from "@/types";
 import { createCrudHandlers } from "./createCrudHandlers";
+import { authHandlers } from "./authHandlers";
 
 type ProjectListParams = {
   search?: string;
@@ -91,4 +92,4 @@ export const projectsHandlers = createCrudHandlers<
   notFoundMessage: "Project not found",
 });
 
-export const worker = setupWorker(...projectsHandlers);
+export const worker = setupWorker(...projectsHandlers, ...authHandlers);

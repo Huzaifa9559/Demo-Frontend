@@ -1,4 +1,5 @@
 export const ROUTE_URLS = {
+  login: '/login',
   home: '/home',
   projects: '/projects',
   analytics: '/analytics',

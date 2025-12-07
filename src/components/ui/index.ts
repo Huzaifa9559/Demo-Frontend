@@ -6,3 +6,7 @@ export * from "./Modal";
 export * from "./Table";
 export * from "./Header";
 export * from "./Card";
+export * from "./Input";
+export * from "./Label";
+export * from "./Form";
+export * from "./Checkbox";

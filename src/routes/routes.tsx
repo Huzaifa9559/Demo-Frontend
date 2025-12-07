@@ -1,4 +1,4 @@
-import { ROUTE_URLS } from "@utils";
+import { ROUTE_URLS, ROUTE_CONFIG } from "@utils";
 import { Suspense } from "react";
 import {
   createBrowserRouter,
@@ -13,34 +13,69 @@ import {
   TeamScreen,
   ResourcesScreen,
   NotFound,
+  LoginScreen,
 } from "@pages";
-import { Layout } from "@components";
+import { Layout, ProtectedRoute } from "@components";
 
-const AppRoutes = [
-  { path: "/", element: <Navigate to={ROUTE_URLS.home} replace /> },
+const PrivateRoutes = [
+  { 
+    path: "/", 
+    element: <Navigate to={ROUTE_URLS.home} replace /> 
+  },
   {
     path: ROUTE_URLS.home,
-    element: <HomeScreen />,
+    element: (
+      <ProtectedRoute allowedRoles={ROUTE_CONFIG.home.allowedRoles}>
+        <HomeScreen />
+      </ProtectedRoute>
+    ),
   },
   {
     path: ROUTE_URLS.projects,
-    element: <ProjectsScreen />,
+    element: (
+      <ProtectedRoute allowedRoles={ROUTE_CONFIG.projects.allowedRoles}>
+        <ProjectsScreen />
+      </ProtectedRoute>
+    ),
   },
   {
     path: ROUTE_URLS.settings,
-    element: <SettingsScreen />,
+    element: (
+      <ProtectedRoute allowedRoles={ROUTE_CONFIG.settings.allowedRoles}>
+        <SettingsScreen />
+      </ProtectedRoute>
+    ),
   },
   {
     path: ROUTE_URLS.analytics,
-    element: <AnalyticsScreen />,
+    element: (
+      <ProtectedRoute allowedRoles={ROUTE_CONFIG.analytics.allowedRoles}>
+        <AnalyticsScreen />
+      </ProtectedRoute>
+    ),
   },
   {
     path: ROUTE_URLS.team,
-    element: <TeamScreen />,
+    element: (
+      <ProtectedRoute allowedRoles={ROUTE_CONFIG.team.allowedRoles}>
+        <TeamScreen />
+      </ProtectedRoute>
+    ),
   },
   {
     path: ROUTE_URLS.resources,
-    element: <ResourcesScreen />,
+    element: (
+      <ProtectedRoute allowedRoles={ROUTE_CONFIG.resources.allowedRoles}>
+        <ResourcesScreen />
+      </ProtectedRoute>
+    ),
+  },
+];
+
+const PublicRoutes = [
+  {
+    path: ROUTE_URLS.login,
+    element: <LoginScreen />,
   },
 ];
 
@@ -48,13 +83,14 @@ const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-      ...AppRoutes,
-      {
-        path: "*",
-        element: <NotFound />,
-      },
+      ...PrivateRoutes,
     ],
   },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
+  ...PublicRoutes,
 ]);
 
 export const AppRouter = () => {

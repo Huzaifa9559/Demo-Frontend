@@ -5,4 +5,6 @@ export * from './analytics';
 export * from './team';
 export * from './resources';
 export * from './not-found';
+export * from './auth';
+
 
