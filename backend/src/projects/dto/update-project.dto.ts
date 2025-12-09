@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateProjectDto } from './create-project.dto';
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsEnum } from 'class-validator';
+import { ProjectStatus } from '../entities/project.entity';
 
 export class UpdateProjectDto extends PartialType(CreateProjectDto) {
   @IsOptional()
@@ -13,7 +14,8 @@ export class UpdateProjectDto extends PartialType(CreateProjectDto) {
   owner?: string;
 
   @IsOptional()
-  status?: string;
+  @IsEnum(ProjectStatus)
+  status?: ProjectStatus;
 
   @IsOptional()
   dueDate?: string;
