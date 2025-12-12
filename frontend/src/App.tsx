@@ -6,24 +6,30 @@ import { Provider } from "react-redux";
 import { store } from "@/store";
 
 async function enableMocking() {
-  if (import.meta.env.DEV) {
+  // Only enable mocking if explicitly enabled via env variable
+  const shouldEnableMocking = import.meta.env.VITE_ENABLE_MOCKING === "true";
+  
+  if (shouldEnableMocking) {
     const { worker } = await import("@mocks");
     return worker.start({
       onUnhandledRequest: "bypass",
     });
   }
+  
+  // If mocking is disabled, resolve immediately
+  return Promise.resolve();
 }
 
 function App() {
-  const [isMockingEnabled, setIsMockingEnabled] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     enableMocking().then(() => {
-      setIsMockingEnabled(true);
+      setIsReady(true);
     });
   }, []);
 
-  if (!isMockingEnabled) {
+  if (!isReady) {
     return null; // or a loading spinner
   }
 
