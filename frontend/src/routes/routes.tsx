@@ -81,6 +81,12 @@ const PublicRoutes = [
 
 const router = createBrowserRouter([
   {
+    element: <PublicRoute />,
+    children: [
+      ...PublicRoutes,
+    ],
+  },
+  {
     element: (
       <ProtectedRoute>
         <Layout />
@@ -91,10 +97,8 @@ const router = createBrowserRouter([
     ],
   },
   {
-    element: <PublicRoute />,
-    children: [
-      ...PublicRoutes,
-    ],
+    path: ROUTE_URLS.notFound,
+    element: <NotFound />,
   },
   {
     path: "*",
