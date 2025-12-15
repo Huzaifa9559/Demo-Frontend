@@ -13,7 +13,7 @@ export const useUpdateProject = () => {
   >({
     mutationFn: async (data) => {
       const url = apiEndpoints.projects.update(data.id);
-      return apiService.put<ProjectRecord, UpdateProjectPayload>(
+      return apiService.patch<ProjectRecord, UpdateProjectPayload>(
         url,
         data.payload
       );

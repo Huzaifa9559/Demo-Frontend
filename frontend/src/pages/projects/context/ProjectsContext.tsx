@@ -16,13 +16,7 @@ export type ProjectsContextValue = {
   filteredProjects: ProjectRecord[];
   statusColors: Record<ProjectRecord["status"], string>;
   isLoading: boolean;
-  searchTerm: string;
-  statusFilter: StatusFilter;
-  rangeFilter: RangeFilter;
   pagination: TablePaginationConfig;
-  handleSearchChange: (value: string) => void;
-  handleStatusChange: (value: StatusFilter) => void;
-  handleRangeChange: (value: RangeFilter) => void;
   handleTableChange: TableProps<ProjectRecord>["onChange"];
   onTableChange: TableProps<ProjectRecord>["onChange"];
   openCreateForm: () => void;
@@ -41,7 +35,7 @@ export type ProjectsContextValue = {
   >;
   headerProps: Pick<
     HeaderProps,
-    "label" | "title" | "subtitle" | "subtitleSuffix" | "actions"
+    "label" | "title" | "subtitle" | "subtitleSuffix" | "actions" | "actionsAllowed"
   >;
   layout?: ProjectsLayoutConfig;
 };

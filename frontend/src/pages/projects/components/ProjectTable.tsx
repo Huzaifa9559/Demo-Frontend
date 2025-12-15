@@ -9,6 +9,7 @@ import { Button, Table } from "@components/ui";
 import { useMemo } from "react";
 import type { ProjectRecord } from "@/types";
 import { useProjectsContext } from "../context/ProjectsContext";
+import { useAppSelector } from "@/store";
 
 type ProjectTableProps = {
   className?: string;
@@ -29,6 +30,8 @@ export const ProjectTable = ({ className }: ProjectTableProps) => {
     ...pagination,
     total: pagination.total ?? filteredProjects.length,
   };
+
+  const user=useAppSelector((state) => state.auth.user);
 
 
   const columns: TableProps<ProjectRecord>["columns"] = useMemo(
@@ -108,13 +111,13 @@ export const ProjectTable = ({ className }: ProjectTableProps) => {
             >
               View
             </Button>
-            <Button
+            {user?.role === 'admin' && <Button
               size="small"
               type="text"
               onClick={() => openEditForm(record)}
             >
               Edit
-            </Button>
+            </Button>}
           </Space>
         ),
       },

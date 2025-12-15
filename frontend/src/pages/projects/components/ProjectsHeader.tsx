@@ -6,7 +6,6 @@ type ProjectsHeaderProps = {
 
 export const ProjectsHeader = ({ className }: ProjectsHeaderProps) => {
   const { headerProps } = useProjectsContext();
-
   return (
     <Header className={className}>
       <Header.Content>
@@ -20,7 +19,7 @@ export const ProjectsHeader = ({ className }: ProjectsHeaderProps) => {
           </Header.Subtitle>
         )}
       </Header.Content>
-      {headerProps.actions && (
+      {headerProps.actions && headerProps.actionsAllowed && (
         <Header.Actions>{headerProps.actions}</Header.Actions>
       )}
     </Header>

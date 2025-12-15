@@ -33,7 +33,7 @@ function Projects({ children, layout }: ProjectsProviderProps) {
   const modals = useProjectModals();
 
   // Fetch projects
-  const { data: projects = [], isLoading } = useGetProjects({
+  const { data: projectsData = { data: [], meta: { totalItems: 0 } }, isLoading } = useGetProjects({
     search: filters.searchTerm || undefined,
     status: filters.statusFilter !== "all" ? filters.statusFilter : undefined,
     range: filters.rangeFilter,
@@ -41,7 +41,7 @@ function Projects({ children, layout }: ProjectsProviderProps) {
 
   // Filter projects
   const { filteredProjects } = useProjectFiltering({
-    projects,
+    projects: projectsData.data,
     searchTerm: filters.searchTerm,
     statusFilter: filters.statusFilter,
     rangeFilter: filters.rangeFilter,
@@ -62,7 +62,7 @@ function Projects({ children, layout }: ProjectsProviderProps) {
   );
 
   const { headerProps } = useProjectHeader({
-    projectsCount: projects.length,
+    projectsCount: projectsData.meta.totalItems,
     rangeFilter: filters.rangeFilter,
     layout,
     defaultActions,
@@ -70,17 +70,11 @@ function Projects({ children, layout }: ProjectsProviderProps) {
 
   // Context value
   const contextValue: ProjectsContextValue = {
-    projects,
+    projects: projectsData.data,
     filteredProjects,
     statusColors: PROJECT_STATUS_COLORS,
     isLoading,
-    searchTerm: filters.searchTerm,
-    statusFilter: filters.statusFilter,
-    rangeFilter: filters.rangeFilter,
     pagination: filters.pagination,
-    handleSearchChange: filters.handleSearchChange,
-    handleStatusChange: filters.handleStatusChange,
-    handleRangeChange: filters.handleRangeChange,
     handleTableChange: filters.handleTableChange,
     onTableChange: filters.handleTableChange,
     openCreateForm: modals.openCreateForm,
