@@ -3,8 +3,8 @@ import { Button, Form, Input } from '@components';
 import { Link } from 'react-router-dom';
 import { ROUTE_URLS } from '@utils';
 
-export interface LoginFormProps {
-  onSubmit: (values: { email: string; password: string }) => void;
+export interface SignupFormProps {
+  onSubmit: (values: { email: string; password: string; name: string }) => void;
   isLoading?: boolean;
   error?: string | null;
 }
@@ -12,26 +12,39 @@ export interface LoginFormProps {
 type FieldType = {
   email: string;
   password: string;
+  name: string;
+  confirmPassword: string;
 };
 
-export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps) => {
+export const SignupForm = ({ onSubmit, isLoading = false, error }: SignupFormProps) => {
   const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
     onSubmit({
       email: values.email!,
       password: values.password!,
+      name: values.name!,
     });
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Sign Up</h1>
         <Form
-          name="login"
+          name="signup"
           layout="vertical"
           className="space-y-4"
           onFinish={onFinish}
         >
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[
+              { required: true, message: 'Please input your name!' },
+            ]}
+          >
+            <Input placeholder="Enter your name" />
+          </Form.Item>
+
           <Form.Item
             label="Email"
             name="email"
@@ -48,9 +61,29 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
             name="password"
             rules={[
               { required: true, message: 'Please input your password!' },
+              { min: 6, message: 'Password must be at least 6 characters!' }
             ]}
           >
             <Input.Password placeholder="Enter your password" />
+          </Form.Item>
+
+          <Form.Item
+            label="Confirm Password"
+            name="confirmPassword"
+            dependencies={['password']}
+            rules={[
+              { required: true, message: 'Please confirm your password!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('The two passwords do not match!'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="Confirm your password" />
           </Form.Item>
 
           {error && (
@@ -65,30 +98,21 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
             className="w-full"
             loading={isLoading}
           >
-            Login
+            Sign Up
           </Button>
         </Form>
 
-        <div className="mt-4 text-sm text-center space-y-2">
-          <div>
-            <Link to={ROUTE_URLS.forgetPassword} className="text-blue-600 hover:underline">
-              Forget Password?
+        <div className="mt-4 text-sm text-center">
+          <p className="text-gray-600">
+            Already have an account?{' '}
+            <Link to={ROUTE_URLS.login} className="text-blue-600 hover:underline">
+              Login
             </Link>
-          </div>
-          <div className="text-gray-600">
-            Don't have an account?{' '}
-            <Link to={ROUTE_URLS.signup} className="text-blue-600 hover:underline">
-              Sign Up
-            </Link>
-          </div>
-          <div className="mt-4 pt-4 border-t border-gray-200 text-gray-600">
-            <p className="mb-2">Demo credentials:</p>
-            <p>Admin: admin@example.com / admin123</p>
-            <p>User: user@example.com / user123</p>
-          </div>
+          </p>
         </div>
       </div>
     </div>
   );
 };
+
 

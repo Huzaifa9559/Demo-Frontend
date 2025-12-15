@@ -35,7 +35,12 @@ export class User {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column({ nullable: true })
+  otp: string | null;
+
+  @Column({ nullable: true })
+  otpExpiry: Date | null;
+
   @UpdateDateColumn()
   updatedAt: Date;
 }
-
