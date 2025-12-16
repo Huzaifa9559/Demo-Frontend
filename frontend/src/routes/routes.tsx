@@ -14,6 +14,8 @@ import {
   ResourcesScreen,
   NotFound,
   LoginScreen,
+  SignupScreen,
+  ForgetPasswordScreen,
 } from "@pages";
 import { Layout, ProtectedRoute, PublicRoute } from "@components";
 
@@ -77,9 +79,23 @@ const PublicRoutes = [
     path: ROUTE_URLS.login,
     element: <LoginScreen />,
   },
+  {
+    path: ROUTE_URLS.signup,
+    element: <SignupScreen />,
+  },
+  {
+    path: ROUTE_URLS.forgetPassword,
+    element: <ForgetPasswordScreen />,
+  },
 ];
 
 const router = createBrowserRouter([
+  {
+    element: <PublicRoute />,
+    children: [
+      ...PublicRoutes,
+    ],
+  },
   {
     element: (
       <ProtectedRoute>
@@ -91,10 +107,8 @@ const router = createBrowserRouter([
     ],
   },
   {
-    element: <PublicRoute />,
-    children: [
-      ...PublicRoutes,
-    ],
+    path: ROUTE_URLS.notFound,
+    element: <NotFound />,
   },
   {
     path: "*",

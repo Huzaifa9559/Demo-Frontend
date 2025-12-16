@@ -26,3 +26,42 @@ export interface AuthState {
   error: string | null;
 }
 
+export interface SignupCredentials {
+  email: string;
+  password: string;
+  name: string;
+}
+
+export interface SignupResponse {
+  user: Omit<User, 'password'>;
+  token: string;
+}
+
+export interface RequestOtpCredentials {
+  email: string;
+}
+
+export interface RequestOtpResponse {
+  message: string;
+  otp?: string; // Only in development
+}
+
+export interface VerifyOtpCredentials {
+  email: string;
+  otp: string;
+}
+
+export interface VerifyOtpResponse {
+  message: string;
+}
+
+export interface ResetPasswordCredentials {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
+

@@ -1,27 +1,28 @@
+import { useSearchParamsUtility } from '@hooks';
 import { Select, type SelectProps } from 'antd'
 
 export type DropdownProps = SelectProps & {
+  paramKey: string
   className?: string
   options?: Array<{ label: string; value: string | number }>
-  value?: string | number
-  onChange?: (value: string | number) => void
   placeholder?: string
 }
 
 export const Dropdown = ({
+  paramKey,
   className,
   options = [],
-  value,
-  onChange,
+  defaultValue,
   placeholder = 'Select...',
   ...props
 }: DropdownProps) => {
+  const { getFilterParam, setFilterParams } = useSearchParamsUtility();
   return (
     <Select
       className={className}
       options={options}
-      value={value}
-      onChange={onChange}
+      value={getFilterParam(paramKey, defaultValue)}
+      onChange={(value) => setFilterParams(paramKey, value as string)}
       placeholder={placeholder}
       {...props}
     />

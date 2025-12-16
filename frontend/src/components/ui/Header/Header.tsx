@@ -112,6 +112,7 @@ export type HeaderProps = {
   subtitle?: string;
   subtitleSuffix?: string;
   actions?: ReactNode;
+  actionsAllowed?: boolean;
   className?: string;
 };
 

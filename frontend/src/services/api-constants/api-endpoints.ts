@@ -11,7 +11,11 @@ export const apiEndpoints = {
   },
   auth: {
     login: `${AUTH_BASE}/login`,
+    signup: `${AUTH_BASE}/signup`,
     me: `${AUTH_BASE}/me`,
     logout: `${AUTH_BASE}/logout`,
+    requestOtp: `${AUTH_BASE}/forget-password/request-otp`,
+    verifyOtp: `${AUTH_BASE}/forget-password/verify-otp`,
+    resetPassword: `${AUTH_BASE}/forget-password/reset`,
   },
 };

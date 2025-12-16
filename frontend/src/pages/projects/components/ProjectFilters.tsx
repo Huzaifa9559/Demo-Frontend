@@ -1,30 +1,43 @@
+import { memo, useEffect } from "react";
 import { Search, Dropdown } from "@components/ui";
 import {
   RANGE_OPTIONS,
   STATUS_OPTIONS,
-  type RangeFilter,
-  type StatusFilter,
 } from "@utils";
-import { useProjectFilters } from "@hooks";
-import { useProjectsContext } from "../context";
+import { useSearchParams } from "react-router-dom";
 
 type ProjectFiltersProps = {
   className?: string;
 };
 
-export const ProjectFilters = ({
+const STATUS_DROPDOWN_OPTIONS = STATUS_OPTIONS.map((opt) => ({
+  label: opt.label,
+  value: opt.value,
+}));
+
+const RANGE_DROPDOWN_OPTIONS = RANGE_OPTIONS.map((opt) => ({
+  label: opt.label,
+  value: opt.value,
+}));
+
+export const ProjectFilters = memo(({
   className,
 }: ProjectFiltersProps = {}) => {
-  const {
-    searchTerm,
-    statusFilter,
-    rangeFilter,
-    handleSearchChange,
-    handleStatusChange,
-    handleRangeChange,
-  } = useProjectsContext();
+  // const [searchParams, setSearchParams] = useSearchParams();
+  // useEffect(() => {
+  //   if (searchParams.has("status") && searchParams.has("range")) {
+  //     return;
+  //   }
+  //   setSearchParams((prev) => {
+  //     const newParams = new URLSearchParams(prev);
+  //     newParams.set("status", "all");
+  //     newParams.set("range", "quarter");
+  //     return newParams;
+  //   });
+  // }, []);
 
-  return (
+  console.log("hello");
+  return (  
     <div
       className={`flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between ${
         className ?? ""
@@ -33,31 +46,22 @@ export const ProjectFilters = ({
       <Search
         placeholder="Search projects"
         allowClear
-        value={searchTerm}
-        onChange={(event) => handleSearchChange(event.target.value)}
-        onSearch={handleSearchChange}
         className="w-full md:max-w-sm"
       />
       <div className="flex flex-col gap-3 md:flex-row">
         <Dropdown
-          value={statusFilter}
-          options={STATUS_OPTIONS.map((opt) => ({
-            label: opt.label,
-            value: opt.value,
-          }))}
-          onChange={(value) => handleStatusChange(value as StatusFilter)}
+          paramKey="status"
           className="w-full md:w-48"
+          options={STATUS_DROPDOWN_OPTIONS}
+          defaultValue="all"
         />
         <Dropdown
-          value={rangeFilter}
-          options={RANGE_OPTIONS.map((opt) => ({
-            label: opt.label,
-            value: opt.value,
-          }))}
-          onChange={(value) => handleRangeChange(value as RangeFilter)}
+          paramKey="range"
           className="w-full md:w-48"
+          options={RANGE_DROPDOWN_OPTIONS}
+          defaultValue="quarter"
         />
       </div>
     </div>
   );
-};
+});

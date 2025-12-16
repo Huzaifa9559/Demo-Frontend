@@ -34,9 +34,7 @@ export const useProjectForm = ({
         projectCode: values.projectCode,
         owner: values.owner,
         status: values.status,
-        dueDate: values.dueDate
-          ? values.dueDate.format("MMM D, YYYY")
-          : dayjs().format("MMM D, YYYY"),
+        dueDate: values.dueDate ? values.dueDate.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
         tickets: values.tickets,
       };
 
