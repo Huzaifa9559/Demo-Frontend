@@ -52,12 +52,27 @@ export const getErrorMessage = (
   }
 
   if (typeof error === "object" && error !== null) {
-    const maybeAxiosError = error as any;
-    if (maybeAxiosError.response?.data?.message) {
-      return maybeAxiosError.response.data.message;
+    const errorObj = error as any;
+    
+    // Check for backend API error structure: { success: false, error: { message: "...", details: "..." } }
+    if (errorObj.error?.message && typeof errorObj.error.message === "string") {
+      return errorObj.error.message;
     }
-    if (maybeAxiosError.message) {
-      return maybeAxiosError.message;
+    
+    // Check for axios error structure
+    if (errorObj.response?.data?.error?.message) {
+      return errorObj.response.data.error.message;
+    }
+    if (errorObj.response?.data?.message) {
+      return errorObj.response.data.message;
+    }
+    if (errorObj.response?.data?.error) {
+      return errorObj.response.data.error;
+    }
+    
+    // Check for direct message property
+    if (errorObj.message && typeof errorObj.message === "string") {
+      return errorObj.message;
     }
   }
 

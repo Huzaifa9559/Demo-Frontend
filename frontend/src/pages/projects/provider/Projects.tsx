@@ -1,102 +1,68 @@
 import { type ReactNode } from "react";
-import { Button } from "@components/ui";
-import { PlusOutlined } from "@ant-design/icons";
 import {
   ProjectsContextProvider,
   type ProjectsContextValue,
-  type ProjectsLayoutConfig,
 } from "../context/ProjectsContext";
-import { PROJECT_STATUS_COLORS } from "@/types";
 import { useGetProjects } from "@services";
 import {
   useProjectFilters,
-  useProjectFiltering,
   useProjectModals,
   useProjectForm,
-  useProjectHeader,
 } from "@hooks";
-import { ProjectsHeader } from "../components/ProjectsHeader";
-import { ProjectFilters } from "../components/ProjectFilters";
-import { ProjectTable } from "../components/ProjectTable";
-import { ProjectViewModal } from "../components/ProjectViewModal";
-import { ProjectCreateModal } from "../components/ProjectCreateModal";
-import { ProjectEditModal } from "../components/ProjectEditModal";
+import { 
+  ProjectsHeader,
+  ProjectFilters,
+  ProjectTable,
+  ProjectViewModal,
+} from "../components";
+import { ProjectFormModal } from "../components/ProjectFormModal";
 
 type ProjectsProviderProps = {
   children: ReactNode;
-  layout?: ProjectsLayoutConfig;
 };
 
-function Projects({ children, layout }: ProjectsProviderProps) {
-  // State management
+export const Projects = ({ children}: ProjectsProviderProps) => {
   const filters = useProjectFilters();
   const modals = useProjectModals();
 
-  // Fetch projects
+  // Fetch projects with filters and pagination
   const { data: projectsData = { data: [], meta: { totalItems: 0 } }, isLoading } = useGetProjects({
     search: filters.searchTerm || undefined,
     status: filters.statusFilter !== "all" ? filters.statusFilter : undefined,
     range: filters.rangeFilter,
-  });
-
-  // Filter projects
-  const { filteredProjects } = useProjectFiltering({
-    projects: projectsData.data,
-    searchTerm: filters.searchTerm,
-    statusFilter: filters.statusFilter,
-    rangeFilter: filters.rangeFilter,
+    page: filters.pagination.current,
+    pageSize: filters.pagination.pageSize,
   });
 
   // Form submission
-  const { handleFormSubmit } = useProjectForm({
+  const { handleFormSubmit, isLoading: isFormLoading } = useProjectForm({
     selectedProject: modals.selectedProject,
     formMode: modals.formMode,
     onSuccess: modals.closeForm,
   });
 
-  // Header actions
-  const defaultActions = (
-    <Button type="primary" icon={<PlusOutlined />} onClick={modals.openCreateForm}>
-      New Project
-    </Button>
-  );
-
-  const { headerProps } = useProjectHeader({
-    projectsCount: projectsData.meta.totalItems,
-    rangeFilter: filters.rangeFilter,
-    layout,
-    defaultActions,
-  });
-
   // Context value
   const contextValue: ProjectsContextValue = {
     projects: projectsData.data,
-    filteredProjects,
-    statusColors: PROJECT_STATUS_COLORS,
     isLoading,
-    pagination: filters.pagination,
-    handleTableChange: filters.handleTableChange,
+    pagination: {
+      ...filters.pagination,
+      total: projectsData.meta.totalItems,
+    },
+    projectsCount: projectsData.meta.totalItems,
+    rangeFilter: filters.rangeFilter,
     onTableChange: filters.handleTableChange,
-    openCreateForm: modals.openCreateForm,
-    openEditForm: modals.openEditForm,
     openDetails: modals.openDetails,
+    openEditForm: modals.openEditForm,
+    isDetailsOpen: modals.isDetailsOpen,
+    selectedProject: modals.selectedProject,
     closeDetails: modals.closeDetails,
     isFormOpen: modals.isFormOpen,
-    isDetailsOpen: modals.isDetailsOpen,
     formMode: modals.formMode,
-    selectedProject: modals.selectedProject,
     handleFormSubmit,
+    isFormLoading,
     closeForm: modals.closeForm,
-    detailsModalProps: {
-      open: modals.isDetailsOpen,
-      title: "Project details",
-      onCancel: modals.closeDetails,
-      onOk: modals.closeDetails,
-      okText: "Close",
-      cancelButtonProps: { style: { display: "none" } },
-    },
-    headerProps,
-    layout,
+    openCreateForm: modals.openCreateForm,
   };
 
   return (
@@ -111,7 +77,4 @@ Projects.Header = ProjectsHeader;
 Projects.Filters = ProjectFilters;
 Projects.Table = ProjectTable;
 Projects.ViewModal = ProjectViewModal;
-Projects.CreateModal = ProjectCreateModal;
-Projects.EditModal = ProjectEditModal;
-
-export { Projects };
+Projects.FormModal = ProjectFormModal;

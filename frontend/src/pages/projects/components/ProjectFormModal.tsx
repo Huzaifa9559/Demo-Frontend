@@ -1,36 +1,54 @@
 import { DatePicker, Input, InputNumber, Select } from "antd";
-import { Modal } from "@components/ui";
+import { Modal, FormField } from "@components/ui";
 import dayjs, { Dayjs } from "dayjs";
 import { useFormik } from "formik";
 import { FormValidator, FormInitials } from "@utils";
 import { useProjectsContext } from "../context/ProjectsContext";
 import { useEffect } from "react";
-
-
 import type { ProjectRecord } from "@/types";
+
 export type ProjectFormValues = {
-    name: string;
-    projectCode: string;
-    owner: string;
-    status: ProjectRecord["status"];
-    dueDate: Dayjs | null;
-    tickets: number;
-  };
-  
-type ProjectCreateModalProps = {
+  name: string;
+  projectCode: string;
+  owner: string;
+  status: ProjectRecord["status"];
+  dueDate: Dayjs | null;
+  tickets: number;
+};
+
+type ProjectFormModalProps = {
   className?: string;
 };
 
-export const ProjectCreateModal = ({
-  className,
-}: ProjectCreateModalProps = {}) => {
-  const { isFormOpen, formMode, handleFormSubmit, closeForm } =
-    useProjectsContext();
+const STATUS_OPTIONS = [
+  { label: "In Progress", value: "In Progress" },
+  { label: "On Hold", value: "On Hold" },
+  { label: "Completed", value: "Completed" },
+  { label: "Blocked", value: "Blocked" },
+];
 
-  const isOpen = isFormOpen && formMode === "create";
+export const ProjectFormModal = ({
+  className,
+}: ProjectFormModalProps = {}) => {
+  const {
+    isFormOpen,
+    formMode,
+    selectedProject,
+    handleFormSubmit,
+    isFormLoading,
+    closeForm,
+  } = useProjectsContext();
+
+  const isOpen = isFormOpen && (formMode === "create" || formMode === "edit");
+  const isEditMode = formMode === "edit";
 
   const formik = useFormik<ProjectFormValues>({
-    initialValues: FormInitials.projectFormInitials(),
+    initialValues: isEditMode && selectedProject
+      ? {
+          ...FormInitials.projectFormInitials(selectedProject),
+          dueDate: dayjs(selectedProject.dueDate, "MMM D, YYYY"),
+        }
+      : FormInitials.projectFormInitials(),
     validationSchema: FormValidator.projectFormValidationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
@@ -45,9 +63,16 @@ export const ProjectCreateModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      formik.setValues(FormInitials.projectFormInitials());
+      if (isEditMode && selectedProject) {
+        formik.setValues({
+          ...FormInitials.projectFormInitials(selectedProject),
+          dueDate: dayjs(selectedProject.dueDate, "MMM D, YYYY"),
+        });
+      } else {
+        formik.setValues(FormInitials.projectFormInitials());
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isEditMode, selectedProject]);
 
   const handleOk = async () => {
     await formik.submitForm();
@@ -58,20 +83,14 @@ export const ProjectCreateModal = ({
     closeForm();
   };
 
-  const statusOptions = [
-    { label: "In Progress", value: "In Progress" },
-    { label: "On Hold", value: "On Hold" },
-    { label: "Completed", value: "Completed" },
-    { label: "Blocked", value: "Blocked" },
-  ];
-
   return (
     <Modal
       open={isOpen}
-      title="Create new project"
+      title={isEditMode ? "Edit project" : "Create new project"}
       onCancel={handleCancel}
       onOk={handleOk}
-      okText="Create"
+      okText={isEditMode ? "Save changes" : "Create"}
+      confirmLoading={isFormLoading}
       className={className}
       afterClose={() => {
         formik.resetForm();
@@ -79,10 +98,11 @@ export const ProjectCreateModal = ({
     >
       <form onSubmit={formik.handleSubmit}>
         <div className="flex flex-col gap-4">
-          <div>
-            <label className="block mb-1 text-sm font-medium">
-              Project name
-            </label>
+          <FormField
+            label="Project name"
+            error={formik.errors.name}
+            touched={formik.touched.name}
+          >
             <Input
               name="name"
               placeholder="Portal redesign"
@@ -94,17 +114,13 @@ export const ProjectCreateModal = ({
               onBlur={formik.handleBlur}
               status={formik.touched.name && formik.errors.name ? "error" : ""}
             />
-            {formik.touched.name && formik.errors.name && (
-              <div className="mt-1 text-sm text-red-500">
-                {formik.errors.name}
-              </div>
-            )}
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">
-              Project code
-            </label>
+          <FormField
+            label="Project code"
+            error={formik.errors.projectCode}
+            touched={formik.touched.projectCode}
+          >
             <Input
               name="projectCode"
               placeholder="PRJ-123"
@@ -124,15 +140,13 @@ export const ProjectCreateModal = ({
                   : ""
               }
             />
-            {formik.touched.projectCode && formik.errors.projectCode && (
-              <div className="mt-1 text-sm text-red-500">
-                {formik.errors.projectCode}
-              </div>
-            )}
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">Owner</label>
+          <FormField
+            label="Owner"
+            error={formik.errors.owner}
+            touched={formik.touched.owner}
+          >
             <Input
               name="owner"
               placeholder="Jane Cooper"
@@ -145,15 +159,13 @@ export const ProjectCreateModal = ({
                 formik.touched.owner && formik.errors.owner ? "error" : ""
               }
             />
-            {formik.touched.owner && formik.errors.owner && (
-              <div className="mt-1 text-sm text-red-500">
-                {formik.errors.owner}
-              </div>
-            )}
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">Status</label>
+          <FormField
+            label="Status"
+            error={formik.errors.status}
+            touched={formik.touched.status}
+          >
             <Select
               value={formik.values.status}
               onChange={(value) => formik.setFieldValue("status", value)}
@@ -162,17 +174,15 @@ export const ProjectCreateModal = ({
                 formik.touched.status && formik.errors.status ? "error" : ""
               }
               className="w-full"
-              options={statusOptions}
+              options={STATUS_OPTIONS}
             />
-            {formik.touched.status && formik.errors.status && (
-              <div className="mt-1 text-sm text-red-500">
-                {formik.errors.status}
-              </div>
-            )}
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">Due date</label>
+          <FormField
+            label="Due date"
+            error={formik.errors.dueDate}
+            touched={formik.touched.dueDate}
+          >
             <DatePicker
               className="w-full"
               format="MMM D, YYYY"
@@ -186,17 +196,13 @@ export const ProjectCreateModal = ({
                 formik.touched.dueDate && formik.errors.dueDate ? "error" : ""
               }
             />
-            {formik.touched.dueDate && formik.errors.dueDate && (
-              <div className="mt-1 text-sm text-red-500">
-                {formik.errors.dueDate}
-              </div>
-            )}
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">
-              Open tickets
-            </label>
+          <FormField
+            label="Open tickets"
+            error={formik.errors.tickets}
+            touched={formik.touched.tickets}
+          >
             <InputNumber
               className="w-full"
               min={0}
@@ -208,12 +214,7 @@ export const ProjectCreateModal = ({
                 formik.touched.tickets && formik.errors.tickets ? "error" : ""
               }
             />
-            {formik.touched.tickets && formik.errors.tickets && (
-              <div className="mt-1 text-sm text-red-500">
-                {formik.errors.tickets}
-              </div>
-            )}
-          </div>
+          </FormField>
         </div>
       </form>
     </Modal>

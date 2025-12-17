@@ -35,7 +35,13 @@ export const useGetQuery = <T>({
 
   return useQuery<T>({
     queryKey,
-    queryFn: () => apiService.get<T>(url, { params, headers }),
+    queryFn: async () => {
+      const result = await apiService.get<T>(url, { params, headers });
+      if (result.success) {
+        return result.data;
+      }
+      throw new Error(result.error.message);
+    },
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: false,
@@ -56,10 +62,14 @@ export const usePostMutation = <T, D>({
 }) => {
   const queryClient = useQueryClient();
   return useMutation<T, Error, D>({
-    mutationFn: (data) => {
+    mutationFn: async (data) => {
       const resolvedUrl = isUrlFunction<D>(url) ? url(data) : url;
       const resolvedHeaders = resolveHeaders(headers, data);
-      return apiService.post<T, D>(resolvedUrl, data, { headers: resolvedHeaders });
+      const result = await apiService.post<T, D>(resolvedUrl, data, { headers: resolvedHeaders });
+      if (result.success) {
+        return result.data;
+      }
+      throw new Error(result.error.message);
     },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
@@ -81,9 +91,13 @@ export const usePutMutation = <T, D>({
 }) => {
   const queryClient = useQueryClient();
   return useMutation<T, Error, D>({
-    mutationFn: (data) => {
+    mutationFn: async (data) => {
       const resolvedUrl = isUrlFunction<D>(url) ? url(data) : url;
-      return apiService.put<T, D>(resolvedUrl, data, { headers });
+      const result = await apiService.put<T, D>(resolvedUrl, data, { headers });
+      if (result.success) {
+        return result.data;
+      }
+      throw new Error(result.error.message);
     },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
@@ -105,9 +119,13 @@ export const usePatchMutation = <T, D>({
 }) => {
   const queryClient = useQueryClient();
   return useMutation<T, Error, D>({
-    mutationFn: (data) => {
+    mutationFn: async (data) => {
       const resolvedUrl = isUrlFunction<D>(url) ? url(data) : url;
-      return apiService.patch<T, D>(resolvedUrl, data, { headers });
+      const result = await apiService.patch<T, D>(resolvedUrl, data, { headers });
+      if (result.success) {
+        return result.data;
+      }
+      throw new Error(result.error.message);
     },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
@@ -129,7 +147,13 @@ export const useDeleteMutation = <T>({
 }) => {
   const queryClient = useQueryClient();
   return useMutation<T, Error, string>({
-    mutationFn: (id) => apiService.delete<T>(`${url}/${id}`, headers),
+    mutationFn: async (id) => {
+      const result = await apiService.delete<T>(`${url}/${id}`, headers);
+      if (result.success) {
+        return result.data;
+      }
+      throw new Error(result.error.message);
+    },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
     },
@@ -155,7 +179,13 @@ export const usePaginationQuery = <T>({
       ...(Array.isArray(key) ? key : [key]),
       ...(Object.keys(params).length > 0 ? [params] : []),
     ],
-    queryFn: () => apiService.get<T>(url, { params, headers }),
+    queryFn: async () => {
+      const result = await apiService.get<T>(url, { params, headers });
+      if (result.success) {
+        return result.data;
+      }
+      throw new Error(result.error.message);
+    },
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
     retry: false,
@@ -179,11 +209,15 @@ export const useUploadFileMutation = <T = { url: string; id: string }>({
 }) => {
   return useMutation<T, Error, FormData>({
     mutationFn: async (file: FormData) => {
-      return apiService.post<T, FormData>(url, file, {
+      const result = await apiService.post<T, FormData>(url, file, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      if (result.success) {
+        return result.data;
+      }
+      throw new Error(result.error.message);
     },
     onMutate: () => setUploadProgress?.(0),
     onSuccess,

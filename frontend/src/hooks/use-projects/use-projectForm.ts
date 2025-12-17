@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { toaster } from "@components/ui";
 import { useCreateProject, useUpdateProject } from "@services";
 import type { ProjectRecord } from "@/types";
+import { getErrorMessage } from "@utils";
 
 type ProjectFormValues = {
   name: string;
@@ -51,15 +52,15 @@ export const useProjectForm = ({
         }
         onSuccess?.();
       } catch (error) {
-        toaster.error({
-          message: "Failed to save project",
-          description: String(error),
-        });
-        throw error;
+        toaster.error({ message: getErrorMessage(error) });
       }
     },
     [formMode, selectedProject, createProject, updateProject, onSuccess]
   );
 
-  return { handleFormSubmit };
+  const isLoading = formMode === "edit" 
+    ? updateProject.isPending 
+    : createProject.isPending;
+
+  return { handleFormSubmit, isLoading };
 };

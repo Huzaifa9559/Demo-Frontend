@@ -1,43 +1,34 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { TablePaginationConfig, TableProps } from "antd";
 import type { ProjectRecord } from "@/types";
-import type { RangeFilter, StatusFilter } from "@utils";
-import type { ProjectFormValues } from "../components/ProjectCreateModal";
-import type { ModalProps, HeaderProps } from "@components/ui";
-
-export type ProjectsLayoutConfig = {
-  headerTitle?: string;
-  headerSubtitle?: string;
-  headerActions?: ReactNode;
-};
+import type { ProjectFormValues } from "../components/ProjectFormModal";
+import type { RangeFilter } from "@utils";
 
 export type ProjectsContextValue = {
+  // Data
   projects: ProjectRecord[];
-  filteredProjects: ProjectRecord[];
-  statusColors: Record<ProjectRecord["status"], string>;
   isLoading: boolean;
   pagination: TablePaginationConfig;
-  handleTableChange: TableProps<ProjectRecord>["onChange"];
+  projectsCount: number;
+  rangeFilter: RangeFilter;
+  
+  // Table actions
   onTableChange: TableProps<ProjectRecord>["onChange"];
-  openCreateForm: () => void;
-  openEditForm: (project: ProjectRecord) => void;
   openDetails: (project: ProjectRecord) => void;
-  closeDetails: () => void;
-  isFormOpen: boolean;
+  openEditForm: (project: ProjectRecord) => void;
+  
+  // Modal state
   isDetailsOpen: boolean;
-  formMode: "create" | "edit";
   selectedProject: ProjectRecord | null;
+  closeDetails: () => void;
+  
+  // Form state
+  isFormOpen: boolean;
+  formMode: "create" | "edit";
   handleFormSubmit: (values: ProjectFormValues) => Promise<void>;
+  isFormLoading: boolean;
   closeForm: () => void;
-  detailsModalProps: Pick<
-    ModalProps,
-    "open" | "title" | "onCancel" | "onOk" | "okText" | "cancelButtonProps"
-  >;
-  headerProps: Pick<
-    HeaderProps,
-    "label" | "title" | "subtitle" | "subtitleSuffix" | "actions" | "actionsAllowed"
-  >;
-  layout?: ProjectsLayoutConfig;
+  openCreateForm: () => void;
 };
 
 const ProjectsContext = createContext<ProjectsContextValue | undefined>(

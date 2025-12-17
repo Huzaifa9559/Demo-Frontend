@@ -50,8 +50,8 @@ export const Layout = () => {
         setActiveTab={setActiveTab}
         sideBarTabs={filteredSideBarTabs}
       />
-      <div className="flex-1 flex flex-col">
-        <main className="flex flex-col m-4 gap-4 overflow-auto sm:overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex flex-col m-4 gap-4 overflow-auto">
           <Outlet />
         </main>
       </div>

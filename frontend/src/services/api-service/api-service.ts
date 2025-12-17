@@ -1,51 +1,44 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { HTTP_STATUS_CODES, SOMETHING_WENT_WRONG, UNABLE_TO_FIND } from '@utils';
+import { SOMETHING_WENT_WRONG } from '@utils';
 import { Instance } from './axios-instance';
 
 const AxiosInstance = Instance();
 
-const processFailedRequest = (error: unknown) => {
+export type ApiResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: { message: string; status?: number } };
+
+const processFailedRequest = <T>(error: unknown): ApiResult<T> => {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
     const responseData = error.response?.data;
     
     // Try to get error message from different possible fields
+    // Handle nested error structure: { success: false, error: { message: "...", details: "..." } }
     const serverMessage = 
+      responseData?.error?.message ||
       responseData?.message || 
-      responseData?.error || 
-      responseData?.errorMessage;
+      (typeof responseData?.error === "string" ? responseData.error : null) ||
+      responseData?.errorMessage ||
+      error.message ||
+      SOMETHING_WENT_WRONG;
     
-    // Handle specific status codes with professional messages
-    if (status === HTTP_STATUS_CODES.UNAUTHORIZED) {
-      throw new Error(serverMessage || "Your session has expired or you don't have permission to access this resource. Please log in again.");
-    }
-    
-    if (status === HTTP_STATUS_CODES.FORBIDDEN) {
-      throw new Error(serverMessage || "You don't have permission to perform this action.");
-    }
-    
-    if (status === HTTP_STATUS_CODES.NOT_FOUND) {
-      throw new Error(serverMessage || "The requested resource could not be found.");
-    }
-    
-    if (status === HTTP_STATUS_CODES.CONFLICT) {
-      throw new Error(serverMessage || "A conflict occurred. The resource may have been modified by another user.");
-    }
-    
-    if (status === HTTP_STATUS_CODES.BAD_REQUEST) {
-      throw new Error(serverMessage || "Invalid request. Please check your input and try again.");
-    }
-    
-    if (status === HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR) {
-      throw new Error(serverMessage || "A server error occurred. Please try again later.");
-    }
-    
-    // Default error message
-    throw new Error(serverMessage || SOMETHING_WENT_WRONG);
+    return {
+      success: false,
+      error: {
+        message: serverMessage,
+        status,
+      },
+    };
   }
 
-  throw new Error(SOMETHING_WENT_WRONG);
+  return {
+    success: false,
+    error: {
+      message: error instanceof Error ? error.message : SOMETHING_WENT_WRONG,
+    },
+  };
 };
 
 const unwrapResponse = <T>(response: AxiosResponse<any>): T => {
@@ -63,48 +56,53 @@ const unwrapResponse = <T>(response: AxiosResponse<any>): T => {
 };
 
 export const apiService = {
-  get: async <T>(url: string, options?: AxiosRequestConfig): Promise<T> => {
+  get: async <T>(url: string, options?: AxiosRequestConfig): Promise<ApiResult<T>> => {
     try {
       const response = await AxiosInstance.get(url, options);
-      return unwrapResponse<T>(response);
+      const data = unwrapResponse<T>(response);
+      return { success: true, data };
     } catch (error: any) {
-      return processFailedRequest(error);
+      return processFailedRequest<T>(error);
     }
   },
 
-  post: async <T, D>(url: string, data: D, config?: AxiosRequestConfig): Promise<T> => {
+  post: async <T, D>(url: string, data: D, config?: AxiosRequestConfig): Promise<ApiResult<T>> => {
     try {
       const response = await AxiosInstance.post(url, data, config);
-      return unwrapResponse<T>(response);
+      const result = unwrapResponse<T>(response);
+      return { success: true, data: result };
     } catch (error: any) {
-      return processFailedRequest(error);
+      return processFailedRequest<T>(error);
     }
   },
 
-  put: async <T, D>(url: string, data: D, config?: AxiosRequestConfig): Promise<T> => {
+  put: async <T, D>(url: string, data: D, config?: AxiosRequestConfig): Promise<ApiResult<T>> => {
     try {
       const response = await AxiosInstance.put(url, data, config);
-      return unwrapResponse<T>(response);
+      const result = unwrapResponse<T>(response);
+      return { success: true, data: result };
     } catch (error: any) {
-      return processFailedRequest(error);
+      return processFailedRequest<T>(error);
     }
   },
 
-  patch: async <T, D>(url: string, data: D, config?: AxiosRequestConfig): Promise<T> => {
+  patch: async <T, D>(url: string, data: D, config?: AxiosRequestConfig): Promise<ApiResult<T>> => {
     try {
       const response = await AxiosInstance.patch(url, data, config);
-      return unwrapResponse<T>(response);
+      const result = unwrapResponse<T>(response);
+      return { success: true, data: result };
     } catch (error: any) {
-      return processFailedRequest(error);
+      return processFailedRequest<T>(error);
     }
   },
 
-  delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+  delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<ApiResult<T>> => {
     try {
       const response = await AxiosInstance.delete(url, config);
-      return unwrapResponse<T>(response);
+      const result = unwrapResponse<T>(response);
+      return { success: true, data: result };
     } catch (error: any) {
-      return processFailedRequest(error);
+      return processFailedRequest<T>(error);
     }
   },
 };

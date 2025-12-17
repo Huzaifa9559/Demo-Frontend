@@ -9,10 +9,18 @@ type ProjectViewModalProps = {
 export const ProjectViewModal = ({
   className,
 }: ProjectViewModalProps = {}) => {
-  const { selectedProject, detailsModalProps } = useProjectsContext();
+  const { selectedProject, isDetailsOpen, closeDetails } = useProjectsContext();
 
   return (
-    <Modal {...detailsModalProps} className={className}>
+    <Modal
+      open={isDetailsOpen}
+      title="Project details"
+      onCancel={closeDetails}
+      onOk={closeDetails}
+      okText="Close"
+      cancelButtonProps={{ style: { display: "none" } }}
+      className={className}
+    >
       {selectedProject ? (
         <Descriptions column={1} bordered size="small">
           <Descriptions.Item label="Project">

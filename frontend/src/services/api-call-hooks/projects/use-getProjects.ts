@@ -9,8 +9,11 @@ export const useGetProjects = (params?: ProjectListParams) => {
   if (params?.status) queryParams.status = params.status;
   if (params?.range) queryParams.range = params.range;
 
+  queryParams.page = params?.page ?? 1;
+  queryParams.pageSize = params?.pageSize ?? 10;
+  
   return useGetQuery<PaginatedResponse<ProjectRecord>>({
-    key: ["projects", "list", params],
+    key: ["projects", "list", queryParams],
     url: apiEndpoints.projects.list,
     params: queryParams,
   });
