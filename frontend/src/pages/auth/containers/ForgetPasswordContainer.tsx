@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/store';
 import { useForgetPasswordForm } from '@hooks';
 import { ROUTE_URLS } from '@utils';
-import { ForgetPasswordForm } from '../components/ForgetPasswordForm';
+import { ForgetPasswordForm } from '../presentations/ForgetPasswordForm';
 
 export const ForgetPasswordContainer = () => {
   const navigate = useNavigate();

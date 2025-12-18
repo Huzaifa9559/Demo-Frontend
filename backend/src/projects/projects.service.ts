@@ -66,10 +66,14 @@ export class ProjectsService {
       status: statusFilter,
       range: rangeFilter,
       page = 1,
-      take = 10,
+      pageSize = 10,
+      take, // Support legacy 'take' parameter
       sortBy = SortBy.DUE_DATE,
       sortOrder = SortOrder.ASC,
     } = queryDto;
+
+    // Use pageSize if provided, otherwise fall back to take (for backward compatibility)
+    const itemsPerPage = pageSize ?? take ?? 10;
 
     const queryBuilder = this.projectsRepository.createQueryBuilder('project');
 
@@ -112,13 +116,13 @@ export class ProjectsService {
     queryBuilder.orderBy(`project.${sortColumn}`, sortOrder.toUpperCase() as 'ASC' | 'DESC');
 
     // Pagination
-    const skip = (page - 1) * take;
-    queryBuilder.skip(skip).take(take);
+    const skip = (page - 1) * itemsPerPage;
+    queryBuilder.skip(skip).take(itemsPerPage);
 
     const [projects, totalItems] = await queryBuilder.getManyAndCount();
 
     const projectRecords = projects.map((p) => this.mapToProjectRecord(p));
-    const meta = buildPaginationMeta(page, take, totalItems);
+    const meta = buildPaginationMeta(page, itemsPerPage, totalItems);
 
     return {
       data: projectRecords,

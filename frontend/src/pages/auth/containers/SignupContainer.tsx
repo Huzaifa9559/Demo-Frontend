@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignupForm } from '@hooks';
 import { ROUTE_URLS } from '@utils';
-import { SignupForm } from '../components/SignupForm';
+import { SignupForm } from '../presentations/SignupForm';
 
 export const SignupContainer = () => {
   const navigate = useNavigate();

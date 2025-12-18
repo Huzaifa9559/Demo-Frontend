@@ -55,7 +55,13 @@ export class QueryProjectsDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  take?: number = 10;
+  pageSize?: number = 10;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  take?: number; // Deprecated, use pageSize instead
 
   @IsOptional()
   @IsEnum(SortBy)
