@@ -4,7 +4,7 @@ import type { ProjectRecord } from "@/types";
 
 export const useDeleteProject = () => {
   return useDeleteMutation<ProjectRecord>({
-    url: apiEndpoints.projects.list,
+    url: apiEndpoints.projects.delete,
     keyToInvalidate: { queryKey: ["projects"] },
   });
 };

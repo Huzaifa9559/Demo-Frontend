@@ -7,15 +7,14 @@ import type {
   UseMutationOptions,
 } from '@tanstack/react-query';
 
-const isUrlFunction = <D>(
-  url: API_ENDPOINTS_TYPE | ((data: D) => string)
-): url is (data: D) => string => typeof url === 'function';
-
-export const resolveHeaders = <D>(
-  headers: Record<string, string> | ((data: D) => Record<string, string>),
-  data: D
-): Record<string, string> => {
-  return typeof headers === 'function' ? headers(data) : headers;
+const buildUrl = <U>(url: API_ENDPOINTS_TYPE | ((id: U) => string), id?: U): string => {
+  if (typeof url === 'function') {
+    return url(id as U);
+  }
+  if (typeof url === 'string' && id) {
+    return url.replace(':id', String(id));
+  }
+  return url as string;
 };
 
 export const useGetQuery = <T>({
@@ -35,12 +34,12 @@ export const useGetQuery = <T>({
 
   return useQuery<T>({
     queryKey,
-    queryFn: async () => {
+    queryFn: async (): Promise<T> => {
       const result = await apiService.get<T>(url, { params, headers });
       if (result.success) {
-        return result.data;
+        return result.data!;
       }
-      throw new Error(result.error.message);
+      throw new Error(result.error?.message ?? "An error occurred");
     },
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -55,21 +54,19 @@ export const usePostMutation = <T, D>({
   options,
   headers = {},
 }: {
-  url: API_ENDPOINTS_TYPE | ((data: D) => string) | string;
+  url: API_ENDPOINTS_TYPE;
   keyToInvalidate?: InvalidateQueryFilters;
   options?: Omit<UseMutationOptions<T, Error, D>, 'mutationFn'>;
-  headers?: Record<string, string> | ((data: D) => Record<string, string>);
+  headers?: Record<string, string>;
 }) => {
   const queryClient = useQueryClient();
   return useMutation<T, Error, D>({
-    mutationFn: async (data) => {
-      const resolvedUrl = isUrlFunction<D>(url) ? url(data) : url;
-      const resolvedHeaders = resolveHeaders(headers, data);
-      const result = await apiService.post<T, D>(resolvedUrl, data, { headers: resolvedHeaders });
+    mutationFn: async (data: D): Promise<T> => {
+      const result = await apiService.post<T, D>(url, data, { headers });
       if (result.success) {
-        return result.data;
+        return result.data!;
       }
-      throw new Error(result.error.message);
+      throw new Error(result.error?.message ?? "An error occurred");
     },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
@@ -78,26 +75,26 @@ export const usePostMutation = <T, D>({
   });
 };
 
-export const usePutMutation = <T, D>({
+export const usePutMutation = <T, D, U = string>({
   url,
   keyToInvalidate,
   options,
   headers = {},
 }: {
-  url: API_ENDPOINTS_TYPE | ((data: D) => string) | string;
+  url: API_ENDPOINTS_TYPE | ((id: U) => string);
   keyToInvalidate?: InvalidateQueryFilters;
-  options?: Omit<UseMutationOptions<T, Error, D>, 'mutationFn'>;
+  options?: Omit<UseMutationOptions<T, Error, { payload: D, id?: U }>, 'mutationFn'>;
   headers?: Record<string, string>;
 }) => {
   const queryClient = useQueryClient();
-  return useMutation<T, Error, D>({
-    mutationFn: async (data) => {
-      const resolvedUrl = isUrlFunction<D>(url) ? url(data) : url;
-      const result = await apiService.put<T, D>(resolvedUrl, data, { headers });
+  return useMutation<T, Error, { payload: D, id?: U }>({
+    mutationFn: async ({ payload, id }: { payload: D, id?: U }): Promise<T> => {
+      const finalUrl = buildUrl(url, id);
+      const result = await apiService.put<T, D>(finalUrl, payload, { headers });
       if (result.success) {
-        return result.data;
+        return result.data!;
       }
-      throw new Error(result.error.message);
+      throw new Error(result.error?.message ?? "An error occurred");
     },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
@@ -106,26 +103,26 @@ export const usePutMutation = <T, D>({
   });
 };
 
-export const usePatchMutation = <T, D>({
+export const usePatchMutation = <T, D, U = string>({
   url,
   keyToInvalidate,
   options,
   headers = {},
 }: {
-  url: API_ENDPOINTS_TYPE | ((data: D) => string) | string;
+  url: API_ENDPOINTS_TYPE | ((id: U) => string);
   keyToInvalidate?: InvalidateQueryFilters;
-  options?: Omit<UseMutationOptions<T, Error, D>, 'mutationFn'>;
+  options?: Omit<UseMutationOptions<T, Error, { payload: D, id?: U }>, 'mutationFn'>;
   headers?: Record<string, string>;
 }) => {
   const queryClient = useQueryClient();
-  return useMutation<T, Error, D>({
-    mutationFn: async (data) => {
-      const resolvedUrl = isUrlFunction<D>(url) ? url(data) : url;
-      const result = await apiService.patch<T, D>(resolvedUrl, data, { headers });
+  return useMutation<T, Error, { payload: D, id?: U }>({
+    mutationFn: async ({ payload, id }: { payload: D, id?: U }): Promise<T> => {
+      const finalUrl = buildUrl(url, id);
+      const result = await apiService.patch<T, D>(finalUrl, payload, { headers });
       if (result.success) {
-        return result.data;
+        return result.data!;
       }
-      throw new Error(result.error.message);
+      throw new Error(result.error?.message ?? "An error occurred");
     },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
@@ -147,12 +144,12 @@ export const useDeleteMutation = <T>({
 }) => {
   const queryClient = useQueryClient();
   return useMutation<T, Error, string>({
-    mutationFn: async (id) => {
+    mutationFn: async (id: string): Promise<T> => {
       const result = await apiService.delete<T>(`${url}/${id}`, headers);
       if (result.success) {
-        return result.data;
+        return result.data!;
       }
-      throw new Error(result.error.message);
+      throw new Error(result.error?.message ?? "An error occurred");
     },
     onSuccess: () => {
       if (keyToInvalidate) queryClient.invalidateQueries(keyToInvalidate);
@@ -179,12 +176,12 @@ export const usePaginationQuery = <T>({
       ...(Array.isArray(key) ? key : [key]),
       ...(Object.keys(params).length > 0 ? [params] : []),
     ],
-    queryFn: async () => {
+    queryFn: async (): Promise<T> => {
       const result = await apiService.get<T>(url, { params, headers });
       if (result.success) {
-        return result.data;
+        return result.data!;
       }
-      throw new Error(result.error.message);
+      throw new Error(result.error?.message ?? "An error occurred");
     },
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
@@ -208,16 +205,16 @@ export const useUploadFileMutation = <T = { url: string; id: string }>({
   isAuthenticated?: boolean;
 }) => {
   return useMutation<T, Error, FormData>({
-    mutationFn: async (file: FormData) => {
+    mutationFn: async (file: FormData): Promise<T> => {
       const result = await apiService.post<T, FormData>(url, file, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       if (result.success) {
-        return result.data;
+        return result.data!;
       }
-      throw new Error(result.error.message);
+      throw new Error(result.error?.message ?? "An error occurred");
     },
     onMutate: () => setUploadProgress?.(0),
     onSuccess,

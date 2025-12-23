@@ -1,4 +1,4 @@
-import { useGetQuery } from "../../api-query-hooks";
+import { queryKeys, useGetQuery } from "../../api-query-hooks";
 import { apiEndpoints } from "../../api-constants";
 import type { PaginatedResponse, ProjectRecord } from "@/types";
 import type { ProjectListParams } from "./types";
@@ -13,8 +13,8 @@ export const useGetProjects = (params?: ProjectListParams) => {
   queryParams.pageSize = params?.pageSize ?? 10;
   
   return useGetQuery<PaginatedResponse<ProjectRecord>>({
-    key: ["projects", "list", queryParams],
+    key: [queryKeys.projects.list, ...Object.values(queryParams)],
     url: apiEndpoints.projects.list,
-    params: queryParams,
+    params: queryParams as Record<string, unknown>,
   });
 };

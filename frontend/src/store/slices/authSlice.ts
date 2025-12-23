@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { AuthState, LoginResponse } from "@/types/user";
-import { setAuth, removeAuth } from "@/utils/functions";
+import { setAuthToken, clearAuthToken } from "@/utils/functions/auth-storage";
 
 const initialState: AuthState = {
   user: null,
@@ -24,7 +24,7 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       // Persist to localStorage
-      setAuth(action.payload);
+      setAuthToken(action.payload.token);
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -41,7 +41,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
-      removeAuth();
+      clearAuthToken();
     },
   },
 });

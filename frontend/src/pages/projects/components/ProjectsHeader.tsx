@@ -1,7 +1,7 @@
 import { Header, Button } from "@components/ui";
 import { PlusOutlined } from "@ant-design/icons";
 import { useProjectsContext } from "../context/ProjectsContext";
-import { RANGE_OPTIONS } from "@utils";
+import { RANGE_OPTIONS } from "@/types";
 import { useAppSelector } from "@/store";
 
 type ProjectsHeaderProps = {

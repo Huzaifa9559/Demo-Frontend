@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAuthToken, removeAuth } from "@/utils/functions";
+import { getAuthToken, clearAuthToken } from "@/utils/functions";
 
 export const Instance = () => {
   const AxiosInstance = axios.create({
@@ -26,7 +26,7 @@ export const Instance = () => {
     async (error) => {
       // Handle 401 unauthorized - clear auth and redirect to login
       if (error.response?.status === 401) {
-        removeAuth();
+        clearAuthToken();
         // Redirect will be handled by ProtectedRoute
       }
       return Promise.reject(error);

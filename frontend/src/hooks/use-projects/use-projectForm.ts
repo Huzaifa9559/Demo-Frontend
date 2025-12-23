@@ -2,8 +2,8 @@ import { useCallback } from "react";
 import dayjs from "dayjs";
 import { toaster } from "@components/ui";
 import { useCreateProject, useUpdateProject } from "@services";
-import type { ProjectRecord } from "@/types";
 import { getErrorMessage } from "@utils";
+import type { ProjectRecord } from "@/types";
 
 type ProjectFormValues = {
   name: string;
@@ -42,8 +42,8 @@ export const useProjectForm = ({
       try {
         if (formMode === "edit" && selectedProject) {
           await updateProject.mutateAsync({
-            id: selectedProject.key,
             payload: normalizedProject,
+            id: selectedProject.key,
           });
           toaster.success({ message: "Project updated successfully" });
         } else {

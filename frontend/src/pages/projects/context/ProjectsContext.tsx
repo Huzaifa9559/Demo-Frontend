@@ -1,8 +1,8 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext} from "react";
 import type { TablePaginationConfig, TableProps } from "antd";
 import type { ProjectRecord } from "@/types";
 import type { ProjectFormValues } from "../components/ProjectFormModal";
-import type { RangeFilter } from "@utils";
+import type { RangeFilter } from "@/types/project";
 
 export type ProjectsContextValue = {
   // Data

@@ -1,9 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
-import { getAuth } from "@/utils/functions";
-
+import { getAuthToken } from "@/utils/functions/auth-storage";
 // Initialize auth state from localStorage
-const persistedAuth = getAuth();
+const persistedAuth = getAuthToken();
 
 export const store = configureStore({
   reducer: {

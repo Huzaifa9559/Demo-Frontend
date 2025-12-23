@@ -6,8 +6,7 @@ import { Instance } from './axios-instance';
 const AxiosInstance = Instance();
 
 export type ApiResult<T> = 
-  | { success: true; data: T }
-  | { success: false; error: { message: string; status?: number } };
+  | { success: boolean; data?: T; error?: { message: string; status?: number } }
 
 const processFailedRequest = <T>(error: unknown): ApiResult<T> => {
   if (axios.isAxiosError(error)) {
@@ -15,7 +14,6 @@ const processFailedRequest = <T>(error: unknown): ApiResult<T> => {
     const responseData = error.response?.data;
     
     // Try to get error message from different possible fields
-    // Handle nested error structure: { success: false, error: { message: "...", details: "..." } }
     const serverMessage = 
       responseData?.error?.message ||
       responseData?.message || 

@@ -6,35 +6,30 @@ export interface RouteConfig {
   allowedRoles?: UserRole[];
 }
 
-/**
- * Role-based route configuration
- * - admin: Can access all routes
- * - user: Limited access to specific routes
- */
 export const ROUTE_CONFIG: Record<string, RouteConfig> = {
   home: {
     path: ROUTE_URLS.home,
-    allowedRoles: ["admin", "user"], // Both roles can access
+    allowedRoles: ["admin", "user"],
   },
   projects: {
     path: ROUTE_URLS.projects,
-    allowedRoles: ["admin", "user"], // Both roles can access
+    allowedRoles: ["admin", "user"],
   },
   analytics: {
     path: ROUTE_URLS.analytics,
-    allowedRoles: ["admin"], // Only admin can access
+    allowedRoles: ["admin"],
   },
   team: {
     path: ROUTE_URLS.team,
-    allowedRoles: ["admin"], // Only admin can access
+    allowedRoles: ["admin"],
   },
   resources: {
     path: ROUTE_URLS.resources,
-    allowedRoles: ["admin", "user"], // Both roles can access
+    allowedRoles: ["admin", "user"],
   },
   settings: {
     path: ROUTE_URLS.settings,
-    allowedRoles: ["admin"], // Only admin can access
+    allowedRoles: ["admin"],
   },
 };
 

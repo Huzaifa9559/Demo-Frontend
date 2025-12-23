@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { TableProps } from "antd";
 import type { ProjectRecord } from "@/types";
-import { type RangeFilter, type StatusFilter } from "@utils";
+import { type RangeFilter, type StatusFilter } from "@/types/project";
 import { useSearchParamsUtility } from "@hooks";
 
 export const useProjectFilters = () => {

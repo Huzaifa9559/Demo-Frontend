@@ -4,10 +4,10 @@ const AUTH_BASE = '/auth';
 export const apiEndpoints = {
   projects: {
     list: `${PROJECTS_BASE}`,
-    detail: (id: string) => `${PROJECTS_BASE}/${id}`,
+    detail: `${PROJECTS_BASE}/:id`,
     create: `${PROJECTS_BASE}`,
-    update: (id: string) => `${PROJECTS_BASE}/${id}`,
-    delete: (id: string) => `${PROJECTS_BASE}/${id}`,
+    update: `${PROJECTS_BASE}/:id`,
+    delete: `${PROJECTS_BASE}/:id`,
   },
   auth: {
     login: `${AUTH_BASE}/login`,

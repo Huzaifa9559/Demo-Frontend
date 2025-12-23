@@ -2,7 +2,7 @@ import { Search, Dropdown } from "@components/ui";
 import {
   RANGE_OPTIONS,
   STATUS_OPTIONS,
-} from "@utils";
+} from "@/types";
 
 type ProjectFiltersProps = {
   className?: string;
