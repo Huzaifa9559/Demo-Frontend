@@ -9,7 +9,8 @@ import type { SideBarTab } from "./layout-utility";
 
 export const Layout = () => {
   const { location } = useNavigation();
-  const { user } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { user = null } = authState || {};
 
   // Filter sidebar tabs based on user role
   const filteredSideBarTabs = useMemo(() => {

@@ -7,7 +7,8 @@ import type { LoginCredentials } from "@/types/user";
 
 export const useLoginForm = () => {
   const dispatch = useAppDispatch();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { isAuthenticated = false } = authState || {};
   const loginMutation = useLogin();
 
   const handleLogin = async (credentials: LoginCredentials) => {

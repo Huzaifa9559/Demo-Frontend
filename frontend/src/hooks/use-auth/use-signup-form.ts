@@ -7,7 +7,8 @@ import type { SignupCredentials } from "@/types/user";
 
 export const useSignupForm = () => {
   const dispatch = useAppDispatch();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { isAuthenticated = false } = authState || {};
   const signupMutation = useSignup();
 
   const handleSignup = async (credentials: SignupCredentials) => {

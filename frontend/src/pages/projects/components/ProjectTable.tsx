@@ -29,7 +29,8 @@ export const ProjectTable = ({ className }: ProjectTableProps) => {
     ...pagination,
   };
 
-  const user=useAppSelector((state) => state.auth.user);
+  const authState = useAppSelector((state) => state.auth);
+  const user = authState?.user || null;
 
 
   const columns: TableProps<ProjectRecord>["columns"] = useMemo(

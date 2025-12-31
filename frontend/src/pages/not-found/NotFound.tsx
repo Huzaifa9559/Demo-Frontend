@@ -6,7 +6,8 @@ import { HomeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 
 export const NotFound = () => {
   const { goTo, goBack } = useNavigation();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { isAuthenticated = false } = authState || {};
 
   const handleGoHome = () => {
     if (isAuthenticated) {

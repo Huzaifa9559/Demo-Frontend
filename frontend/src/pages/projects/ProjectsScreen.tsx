@@ -2,7 +2,8 @@ import { useAppSelector } from "@/store";
 import { Projects } from "./provider";
 
 export const ProjectsScreen = () => {
-  const user = useAppSelector((state) => state.auth.user);
+  const authState = useAppSelector((state) => state.auth);
+  const user = authState?.user || null;
   const isAdmin = user?.role === 'admin';
   
   return (

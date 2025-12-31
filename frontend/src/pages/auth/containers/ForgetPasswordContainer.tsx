@@ -7,7 +7,8 @@ import { ForgetPasswordForm } from '../presentations/ForgetPasswordForm';
 
 export const ForgetPasswordContainer = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { isAuthenticated = false } = authState || {};
   const {
     handleRequestOtp,
     handleVerifyOtp,

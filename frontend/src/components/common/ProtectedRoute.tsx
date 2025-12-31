@@ -9,7 +9,8 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { isAuthenticated = false, user = null } = authState || {};
   const location = useLocation();
 
   // Redirect to login if not authenticated

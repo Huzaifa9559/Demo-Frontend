@@ -9,4 +9,11 @@ export const queryKeys = {
     update: "projects/:id",
     delete: "projects/:id",
   },
+  resources: {
+    list: "resources",
+    detail: "resources/:id",
+    create: "resources",
+    update: "resources/:id",
+    delete: "resources/:id",
+  },
 };

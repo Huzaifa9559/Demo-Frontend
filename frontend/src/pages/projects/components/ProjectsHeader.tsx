@@ -10,7 +10,8 @@ type ProjectsHeaderProps = {
 
 export const ProjectsHeader = ({ className }: ProjectsHeaderProps) => {
   const { projectsCount, rangeFilter, openCreateForm } = useProjectsContext();
-  const user = useAppSelector((state) => state.auth.user);
+  const authState = useAppSelector((state) => state.auth);
+  const user = authState?.user || null;
   const focusWindow = RANGE_OPTIONS.find((option) => option.value === rangeFilter)?.label;
 
   return (

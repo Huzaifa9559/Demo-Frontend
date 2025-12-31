@@ -18,7 +18,8 @@ export const AppSidebar = ({
 }: AppSidebarProps) => {
   const { goTo } = useNavigation();
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { user = null } = authState || {};
 
   const handleTabClick = (tab: SideBarTab) => {
     setActiveTab(tab);

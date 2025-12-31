@@ -1,5 +1,6 @@
 const PROJECTS_BASE = '/projects';
 const AUTH_BASE = '/auth';
+const RESOURCES_BASE = '/resources';
 
 export const apiEndpoints = {
   projects: {
@@ -17,5 +18,12 @@ export const apiEndpoints = {
     requestOtp: `${AUTH_BASE}/forget-password/request-otp`,
     verifyOtp: `${AUTH_BASE}/forget-password/verify-otp`,
     resetPassword: `${AUTH_BASE}/forget-password/reset`,
+  },
+  resources: {
+    list: `${RESOURCES_BASE}`,
+    detail: `${RESOURCES_BASE}/:id`,
+    create: `${RESOURCES_BASE}`,
+    update: `${RESOURCES_BASE}/:id`,
+    delete: `${RESOURCES_BASE}/:id`,
   },
 };
