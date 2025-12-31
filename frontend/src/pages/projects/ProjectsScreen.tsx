@@ -2,7 +2,9 @@ import { useAppSelector } from "@/store";
 import { Projects } from "./provider";
 
 export const ProjectsScreen = () => {
-  const user=useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.auth.user);
+  const isAdmin = user?.role === 'admin';
+  
   return (
     <div className="flex w-full flex-col gap-6">
       <Projects>
@@ -10,7 +12,7 @@ export const ProjectsScreen = () => {
         <Projects.Filters />
         <Projects.Table />
         <Projects.ViewModal />
-        {user?.role === 'admin' && <Projects.FormModal />}
+        {isAdmin && <Projects.FormModal />}
       </Projects>
     </div>
   );

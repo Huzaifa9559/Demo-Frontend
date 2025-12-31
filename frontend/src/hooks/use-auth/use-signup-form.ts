@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setCredentials } from "@/store";
 import { useSignup } from "@/services/api-call-hooks/auth";
+import { getErrorMessage } from "@utils";
 import type { SignupCredentials } from "@/types/user";
 
 export const useSignupForm = () => {
@@ -14,8 +15,8 @@ export const useSignupForm = () => {
       const response = await signupMutation.mutateAsync(credentials);
       dispatch(setCredentials(response));
       toast.success(`Welcome, ${response.user.name}! Account created successfully.`);
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.error || error?.message || "Failed to create account. Please try again.";
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error) || "Failed to create account. Please try again.";
       toast.error(errorMessage);
     }
   };

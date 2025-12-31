@@ -20,17 +20,28 @@ async function enableMocking() {
   return Promise.resolve();
 }
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-lg">Initializing application...</div>
+  </div>
+);
+
 function App() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    enableMocking().then(() => {
-      setIsReady(true);
-    });
+    enableMocking()
+      .then(() => {
+        setIsReady(true);
+      })
+      .catch((error) => {
+        console.error("Failed to initialize mocking:", error);
+        setIsReady(true); // Continue even if mocking fails
+      });
   }, []);
 
   if (!isReady) {
-    return null; // or a loading spinner
+    return <LoadingSpinner />;
   }
 
   return (

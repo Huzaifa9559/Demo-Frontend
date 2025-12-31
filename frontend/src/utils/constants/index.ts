@@ -1,4 +1,4 @@
 export * from './constants';
-export { default as FormInitials } from './form-initials';
+export { FormInitials, type ProjectFormInitialValues } from './form-initials';
 export * from './route-urls';
 export * from './route-config';

@@ -6,7 +6,8 @@ import { Instance } from './axios-instance';
 const AxiosInstance = Instance();
 
 export type ApiResult<T> = 
-  | { success: boolean; data?: T; error?: { message: string; status?: number } }
+  | { success: true; data: T; error?: never }
+  | { success: false; data?: never; error: { message: string; status?: number } }
 
 const processFailedRequest = <T>(error: unknown): ApiResult<T> => {
   if (axios.isAxiosError(error)) {
@@ -39,15 +40,15 @@ const processFailedRequest = <T>(error: unknown): ApiResult<T> => {
   };
 };
 
-const unwrapResponse = <T>(response: AxiosResponse<any>): T => {
+const unwrapResponse = <T>(response: AxiosResponse<unknown>): T => {
   const resData = response.data;
 
-  if (resData && typeof resData === 'object' && 'meta' in resData && 'data' in resData) {
+  if (resData && typeof resData === 'object' && resData !== null && 'meta' in resData && 'data' in resData) {
     return resData as T;
   }
 
-  if ('data' in resData) {
-    return resData.data as T;
+  if (resData && typeof resData === 'object' && resData !== null && 'data' in resData) {
+    return (resData as { data: T }).data;
   }
 
   return resData as T;
@@ -59,7 +60,7 @@ export const apiService = {
       const response = await AxiosInstance.get(url, options);
       const data = unwrapResponse<T>(response);
       return { success: true, data };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return processFailedRequest<T>(error);
     }
   },
@@ -69,7 +70,7 @@ export const apiService = {
       const response = await AxiosInstance.post(url, data, config);
       const result = unwrapResponse<T>(response);
       return { success: true, data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return processFailedRequest<T>(error);
     }
   },
@@ -79,7 +80,7 @@ export const apiService = {
       const response = await AxiosInstance.put(url, data, config);
       const result = unwrapResponse<T>(response);
       return { success: true, data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return processFailedRequest<T>(error);
     }
   },
@@ -89,7 +90,7 @@ export const apiService = {
       const response = await AxiosInstance.patch(url, data, config);
       const result = unwrapResponse<T>(response);
       return { success: true, data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return processFailedRequest<T>(error);
     }
   },
@@ -99,7 +100,7 @@ export const apiService = {
       const response = await AxiosInstance.delete(url, config);
       const result = unwrapResponse<T>(response);
       return { success: true, data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return processFailedRequest<T>(error);
     }
   },

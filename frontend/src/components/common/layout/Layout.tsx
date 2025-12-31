@@ -23,21 +23,23 @@ export const Layout = () => {
     });
   }, [user]);
 
-  const getInitialActiveTab = useCallback(() => {
+  const getInitialActiveTab = useCallback((): SideBarTab | null => {
+    if (filteredSideBarTabs.length === 0) return null;
     return (
       filteredSideBarTabs.find((tab) => location.pathname.startsWith(tab.url)) ??
-      filteredSideBarTabs[0]
+      filteredSideBarTabs[0] ??
+      null
     );
   }, [location.pathname, filteredSideBarTabs]);
 
-  const [activeTab, setActiveTab] = useState<SideBarTab | null>(null);
+  const [activeTab, setActiveTab] = useState<SideBarTab | null>(() => getInitialActiveTab());
 
   useEffect(() => {
-    if (filteredSideBarTabs.length > 0) {
-      const newActiveTab = getInitialActiveTab();
+    const newActiveTab = getInitialActiveTab();
+    if (newActiveTab) {
       setActiveTab(newActiveTab);
     }
-  }, [getInitialActiveTab, filteredSideBarTabs]);
+  }, [getInitialActiveTab]);
 
   if (!activeTab || filteredSideBarTabs.length === 0) {
     return null;

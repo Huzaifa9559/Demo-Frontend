@@ -1,9 +1,10 @@
 import type { ProjectRecord } from "@/types";
+import type { StatusFilter, RangeFilter } from "@/types/project";
 
 export type ProjectListParams = {
   search?: string;
-  status?: string;
-  range?: string;
+  status?: StatusFilter | ProjectRecord["status"];
+  range?: RangeFilter;
   page?: number;
   pageSize?: number;
 };

@@ -1,20 +1,13 @@
 import { DatePicker, Input, InputNumber, Select } from "antd";
 import { Modal, FormField } from "@components/ui";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { useFormik } from "formik";
-import { FormValidator, FormInitials } from "@utils";
+import { FormValidator, FormInitials, type ProjectFormInitialValues } from "@utils";
 import { useProjectsContext } from "../context/ProjectsContext";
 import { useEffect } from "react";
 import type { ProjectRecord } from "@/types";
 
-export type ProjectFormValues = {
-  name: string;
-  projectCode: string;
-  owner: string;
-  status: ProjectRecord["status"];
-  dueDate: Dayjs | null;
-  tickets: number;
-};
+export type ProjectFormValues = ProjectFormInitialValues;
 
 type ProjectFormModalProps = {
   className?: string;
@@ -52,11 +45,7 @@ export const ProjectFormModal = ({
     validationSchema: FormValidator.projectFormValidationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      const formattedValues = {
-        ...values,
-        dueDate: values.dueDate ? values.dueDate : dayjs(),
-      };
-      await handleFormSubmit(formattedValues as any);
+      await handleFormSubmit(values);
       formik.resetForm();
     },
   });

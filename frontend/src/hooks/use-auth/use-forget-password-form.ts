@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useRequestOtp, useVerifyOtp, useResetPassword } from "@/services/api-call-hooks/auth";
-import { ROUTE_URLS } from "@utils";
+import { getErrorMessage, ROUTE_URLS } from "@utils";
 
 export const useForgetPasswordForm = () => {
   const navigate = useNavigate();
@@ -16,8 +16,8 @@ export const useForgetPasswordForm = () => {
       if (import.meta.env.DEV && response.otp) {
         toast.info(`Development OTP: ${response.otp}`, { duration: 10000 });
       }
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.error || error?.message || "Failed to send OTP. Please try again.";
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error) || "Failed to send OTP. Please try again.";
       toast.error(errorMessage);
       throw error;
     }
@@ -27,8 +27,8 @@ export const useForgetPasswordForm = () => {
     try {
       const response = await verifyOtpMutation.mutateAsync({ email, otp });
       toast.success(response.message || "OTP verified successfully");
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.error || error?.message || "Invalid OTP. Please try again.";
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error) || "Invalid OTP. Please try again.";
       toast.error(errorMessage);
       throw error;
     }
@@ -39,8 +39,8 @@ export const useForgetPasswordForm = () => {
       const response = await resetPasswordMutation.mutateAsync({ email, otp, newPassword });
       toast.success(response.message || "Password has been reset successfully");
       navigate(ROUTE_URLS.login);
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.error || error?.message || "Failed to reset password. Please try again.";
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error) || "Failed to reset password. Please try again.";
       toast.error(errorMessage);
       throw error;
     }
