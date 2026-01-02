@@ -11,6 +11,12 @@ import { buildErrorResponse } from '../utils/response.util';
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
+    // Skip GraphQL requests - GraphQL has its own error handling
+    const contextType = host.getType();
+    if (contextType !== 'http') {
+      throw exception;
+    }
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 

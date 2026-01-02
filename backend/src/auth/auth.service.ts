@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { UserRole } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import {
@@ -89,6 +90,7 @@ export class AuthService {
       email: signupDto.email,
       password: hashedPassword,
       name: signupDto.name,
+      role: signupDto.role || UserRole.USER,
     });
 
     const payload: CurrentUserPayload = {

@@ -30,7 +30,9 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
+  const graphqlPath = process.env.GRAPHQL_PATH || '/graphql';
   console.log(`🚀 Application is running on: http://localhost:${port}`);
+  console.log(`📊 GraphQL Playground: http://localhost:${port}${graphqlPath}`);
 }
 
 bootstrap();
