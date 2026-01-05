@@ -1,4 +1,16 @@
-import { ObjectType, Field, InputType, registerEnumType } from '@nestjs/graphql';
+import {
+  ObjectType,
+  Field,
+  InputType,
+  registerEnumType,
+} from '@nestjs/graphql';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsEnum,
+} from 'class-validator';
 import { UserRole } from '../../users/entities/user.entity';
 
 registerEnumType(UserRole, {
@@ -39,24 +51,35 @@ export class LoginResponseType {
 @InputType()
 export class LoginInput {
   @Field()
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
   password: string;
 }
 
-// @InputType()
+@InputType()
 export class SignupInput {
-  // @Field()
+  @Field()
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
 
-  // @Field()
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 
-  // @Field()
+  @Field()
+  @IsString()
+  @IsNotEmpty()
   name: string;
 
-  // @Field(() => UserRole)
-  // role: UserRole;
+  @Field(() => UserRole)
+  @IsEnum(UserRole)
+  role: UserRole;
 }
-

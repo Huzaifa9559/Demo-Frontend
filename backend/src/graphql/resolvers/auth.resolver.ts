@@ -1,11 +1,20 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
+import {
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { AuthService } from '../../auth/auth.service';
 import { UsersService } from '../../users/users.service';
-import { LoginDto } from '../../auth/dto/login.dto';
-import { SignupDto } from '../../auth/dto/signup.dto';
-import { UserType, LoginResponseType, LoginInput, SignupInput } from '../types/user.types';
-import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
-import { UseGuards } from '@nestjs/common';
+import {
+  UserType,
+  LoginResponseType,
+  LoginInput,
+  SignupInput,
+} from '../types/user.types';
+import {
+  CurrentUser,
+  CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Resolver(() => UserType)
@@ -17,13 +26,12 @@ export class AuthResolver {
 
   @Mutation(() => LoginResponseType)
   async login(@Args('input') input: LoginInput) {
-    return await this.authService.login(input as LoginDto);
+    return await this.authService.login(input);
   }
 
   @Mutation(() => LoginResponseType)
   async signup(@Args('input') input: SignupInput) {
-    console.log(input);
-    //return await this.authService.signup(input as SignupDto);
+    return await this.authService.signup(input);
   }
 
   @Query(() => UserType)
@@ -31,7 +39,7 @@ export class AuthResolver {
   async me(@CurrentUser() user: CurrentUserPayload) {
     const userEntity = await this.usersService.findOne(user.sub);
     if (!userEntity) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     return {
       id: userEntity.id,
@@ -43,4 +51,3 @@ export class AuthResolver {
     };
   }
 }
-

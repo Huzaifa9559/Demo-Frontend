@@ -30,6 +30,7 @@ input SignupInput {
   email: String!
   name: String!
   password: String!
+  role: UserRole!
 }
 
 """User role enum"""

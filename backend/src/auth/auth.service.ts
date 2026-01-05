@@ -16,7 +16,7 @@ import {
 } from './dto/forget-password.dto';
 import * as bcrypt from 'bcrypt';
 import { CurrentUserPayload } from '../common/decorators/current-user.decorator';
-
+import { SignupInput } from '../graphql/types/user.types';
 @Injectable()
 export class AuthService {
   constructor(
