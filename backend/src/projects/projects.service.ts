@@ -5,75 +5,61 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Project, ProjectStatus } from './entities/project.entity';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
-import { QueryProjectsDto, StatusFilter, SortBy, SortOrder } from './dto/query-projects.dto';
+import { Project as ProjectEntity, ProjectStatus as EntityProjectStatus } from './entities/project.entity';
+import {
+  CreateProjectInput,
+  UpdateProjectInput,
+  ProjectsQueryInput,
+  ProjectStatus,
+  Project as GraphQLProject,
+  ProjectsOutput,
+  PaginationMeta,
+} from './projects.graphql.types';
 import * as dayjs from 'dayjs';
 import {
   PaginatedResponse,
   buildPaginationMeta,
 } from '../common/utils/response.util';
 
-export interface ProjectRecord {
-  key: string;
-  projectCode: string;
-  name: string;
-  owner: string;
-  status: ProjectStatus;
-  dueDate: string;
-  tickets: number;
-}
-
 @Injectable()
 export class ProjectsService {
   constructor(
-    @InjectRepository(Project)
-    private projectsRepository: Repository<Project>,
+    @InjectRepository(ProjectEntity)
+    private projectsRepository: Repository<ProjectEntity>,
   ) {}
 
-  private mapToProjectRecord(project: Project): ProjectRecord {
-    return {
-      key: project.id,
-      projectCode: project.projectCode,
-      name: project.name,
-      owner: project.owner,
-      status: project.status,
-      dueDate: dayjs(project.dueDate).format('MMM D, YYYY'),
-      tickets: project.tickets,
+  private mapGraphQLStatusToEntity(status: ProjectStatus): EntityProjectStatus {
+    const statusMap: Record<ProjectStatus, EntityProjectStatus> = {
+      'IN_PROGRESS': EntityProjectStatus.IN_PROGRESS,
+      'ON_HOLD': EntityProjectStatus.ON_HOLD,
+      'COMPLETED': EntityProjectStatus.COMPLETED,
+      'BLOCKED': EntityProjectStatus.BLOCKED,
     };
+    return statusMap[status] || EntityProjectStatus.IN_PROGRESS;
   }
 
-  private mapStatusFilter(statusFilter?: StatusFilter): ProjectStatus | null {
-    if (!statusFilter || statusFilter === StatusFilter.ALL) {
-      return null;
-    }
-
-    const statusMap: Record<StatusFilter, ProjectStatus> = {
-      [StatusFilter.ACTIVE]: ProjectStatus.IN_PROGRESS,
-      [StatusFilter.HOLD]: ProjectStatus.ON_HOLD,
-      [StatusFilter.COMPLETED]: ProjectStatus.COMPLETED,
-      [StatusFilter.BLOCKED]: ProjectStatus.BLOCKED,
-      [StatusFilter.ALL]: null as any,
+  private mapEntityStatusToGraphQL(status: EntityProjectStatus): ProjectStatus {
+    const statusMap: Record<EntityProjectStatus, ProjectStatus> = {
+      [EntityProjectStatus.IN_PROGRESS]: 'IN_PROGRESS',
+      [EntityProjectStatus.ON_HOLD]: 'ON_HOLD',
+      [EntityProjectStatus.COMPLETED]: 'COMPLETED',
+      [EntityProjectStatus.BLOCKED]: 'BLOCKED',
     };
-
-    return statusMap[statusFilter] || null;
+    return statusMap[status] || 'IN_PROGRESS';
   }
 
-  async findAll(queryDto: QueryProjectsDto): Promise<PaginatedResponse<ProjectRecord>> {
+  async findAll(input?: ProjectsQueryInput): Promise<ProjectsOutput> {
     const {
       search,
-      status: statusFilter,
+      status: graphqlStatus,
       range: rangeFilter,
       page = 1,
-      pageSize = 10,
-      take, // Support legacy 'take' parameter
-      sortBy = SortBy.DUE_DATE,
-      sortOrder = SortOrder.ASC,
-    } = queryDto;
+      take = 10,
+      sortBy = 'dueDate',
+      sortOrder = 'asc',
+    } = input || {};
 
-    // Use pageSize if provided, otherwise fall back to take (for backward compatibility)
-    const itemsPerPage = pageSize ?? take ?? 10;
+    const itemsPerPage = take;
 
     const queryBuilder = this.projectsRepository.createQueryBuilder('project');
 
@@ -87,31 +73,32 @@ export class ProjectsService {
     }
 
     // Status filter
-    const status = this.mapStatusFilter(statusFilter);
-    if (status) {
-      queryBuilder.andWhere('project.status = :status', { status });
+    if (graphqlStatus) {
+      const entityStatus = this.mapGraphQLStatusToEntity(graphqlStatus);
+      queryBuilder.andWhere('project.status = :status', { status: entityStatus });
     }
 
     // Range filter
     if (rangeFilter) {
       const now = dayjs();
-      const rangeEndMap = {
+      const rangeEndMap: Record<string, dayjs.Dayjs> = {
         week: now.add(7, 'day'),
         month: now.add(1, 'month'),
         quarter: now.add(3, 'month'),
       };
       const rangeEnd = rangeEndMap[rangeFilter];
-      const rangeStart = now.subtract(1, 'day');
-
-      queryBuilder.andWhere('project.dueDate BETWEEN :rangeStart AND :rangeEnd', {
-        rangeStart: rangeStart.toDate(),
-        rangeEnd: rangeEnd.toDate(),
-      });
+      if (rangeEnd) {
+        const rangeStart = now.subtract(1, 'day');
+        queryBuilder.andWhere('project.dueDate BETWEEN :rangeStart AND :rangeEnd', {
+          rangeStart: rangeStart.toDate(),
+          rangeEnd: rangeEnd.toDate(),
+        });
+      }
     }
 
     // Sorting
-    const sortColumn = sortBy === SortBy.DUE_DATE ? 'dueDate' : 
-                      sortBy === SortBy.CREATED_AT ? 'createdAt' : 
+    const sortColumn = sortBy === 'dueDate' ? 'dueDate' : 
+                      sortBy === 'createdAt' ? 'createdAt' : 
                       'projectCode';
     queryBuilder.orderBy(`project.${sortColumn}`, sortOrder.toUpperCase() as 'ASC' | 'DESC');
 
@@ -120,30 +107,59 @@ export class ProjectsService {
     queryBuilder.skip(skip).take(itemsPerPage);
 
     const [projects, totalItems] = await queryBuilder.getManyAndCount();
-
-    const projectRecords = projects.map((p) => this.mapToProjectRecord(p));
     const meta = buildPaginationMeta(page, itemsPerPage, totalItems);
 
+    // Map entities to GraphQL types
+    const graphqlProjects = projects.map((project) => ({
+      id: project.id,
+      projectCode: project.projectCode,
+      name: project.name,
+      owner: project.owner,
+      status: this.mapEntityStatusToGraphQL(project.status),
+      dueDate: project.dueDate,
+      tickets: project.tickets,
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt || undefined,
+    }));
+
     return {
-      data: projectRecords,
-      meta,
+      data: graphqlProjects,
+      meta: {
+        page: meta.page,
+        take: meta.take,
+        totalItems: meta.totalItems,
+        totalPages: meta.totalPages,
+        hasPreviousPage: meta.hasPreviousPage,
+        hasNextPage: meta.hasNextPage,
+      },
     };
   }
 
-  async findOne(id: string): Promise<ProjectRecord> {
+  async findOne(id: string): Promise<GraphQLProject> {
     const project = await this.projectsRepository.findOne({ where: { id } });
 
     if (!project) {
       throw new NotFoundException('Project not found');
     }
 
-    return this.mapToProjectRecord(project);
+    // Map entity to GraphQL type
+    return {
+      id: project.id,
+      projectCode: project.projectCode,
+      name: project.name,
+      owner: project.owner,
+      status: this.mapEntityStatusToGraphQL(project.status),
+      dueDate: project.dueDate,
+      tickets: project.tickets,
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt || undefined,
+    };
   }
 
-  async create(createProjectDto: CreateProjectDto): Promise<ProjectRecord> {
+  async create(input: CreateProjectInput): Promise<GraphQLProject> {
     // Check if projectCode already exists
     const existing = await this.projectsRepository.findOne({
-      where: { projectCode: createProjectDto.projectCode },
+      where: { projectCode: input.projectCode },
     });
 
     if (existing) {
@@ -151,18 +167,31 @@ export class ProjectsService {
     }
 
     const project = this.projectsRepository.create({
-      ...createProjectDto,
-      dueDate: new Date(createProjectDto.dueDate),
+      projectCode: input.projectCode,
+      name: input.name,
+      owner: input.owner,
+      status: this.mapGraphQLStatusToEntity(input.status),
+      dueDate: input.dueDate instanceof Date ? input.dueDate : new Date(input.dueDate),
+      tickets: input.tickets,
     });
 
     const saved = await this.projectsRepository.save(project);
-    return this.mapToProjectRecord(saved);
+
+    // Map entity to GraphQL type
+    return {
+      id: saved.id,
+      projectCode: saved.projectCode,
+      name: saved.name,
+      owner: saved.owner,
+      status: this.mapEntityStatusToGraphQL(saved.status),
+      dueDate: saved.dueDate,
+      tickets: saved.tickets,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt || undefined,
+    };
   }
 
-  async update(
-    id: string,
-    updateProjectDto: UpdateProjectDto,
-  ): Promise<ProjectRecord> {
+  async update(id: string, input: UpdateProjectInput): Promise<GraphQLProject> {
     const project = await this.projectsRepository.findOne({ where: { id } });
 
     if (!project) {
@@ -170,9 +199,9 @@ export class ProjectsService {
     }
 
     // Check if projectCode is being updated and if it conflicts
-    if (updateProjectDto.projectCode && updateProjectDto.projectCode !== project.projectCode) {
+    if (input.projectCode && input.projectCode !== project.projectCode) {
       const existing = await this.projectsRepository.findOne({
-        where: { projectCode: updateProjectDto.projectCode },
+        where: { projectCode: input.projectCode },
       });
 
       if (existing) {
@@ -180,15 +209,30 @@ export class ProjectsService {
       }
     }
 
-    Object.assign(project, {
-      ...updateProjectDto,
-      dueDate: updateProjectDto.dueDate
-        ? new Date(updateProjectDto.dueDate)
-        : project.dueDate,
-    });
+    // Update fields
+    if (input.projectCode !== undefined) project.projectCode = input.projectCode;
+    if (input.name !== undefined) project.name = input.name;
+    if (input.owner !== undefined) project.owner = input.owner;
+    if (input.status !== undefined) project.status = this.mapGraphQLStatusToEntity(input.status);
+    if (input.dueDate !== undefined) {
+      project.dueDate = input.dueDate instanceof Date ? input.dueDate : new Date(input.dueDate);
+    }
+    if (input.tickets !== undefined) project.tickets = input.tickets;
 
     const updated = await this.projectsRepository.save(project);
-    return this.mapToProjectRecord(updated);
+
+    // Map entity to GraphQL type
+    return {
+      id: updated.id,
+      projectCode: updated.projectCode,
+      name: updated.name,
+      owner: updated.owner,
+      status: this.mapEntityStatusToGraphQL(updated.status),
+      dueDate: updated.dueDate,
+      tickets: updated.tickets,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt || undefined,
+    };
   }
 
   async remove(id: string): Promise<void> {

@@ -3,12 +3,13 @@ import {
   ProjectsContextProvider,
   type ProjectsContextValue,
 } from "../context/ProjectsContext";
-import { useGetProjects } from "@services";
 import {
+  useGetProjects,
   useProjectFilters,
   useProjectModals,
   useProjectForm,
-} from "@hooks";
+} from "@services";
+import type { ProjectRecord } from "@/types/project";
 import { 
   ProjectsHeader,
   ProjectFilters,
@@ -25,14 +26,40 @@ export const Projects = ({ children}: ProjectsProviderProps) => {
   const filters = useProjectFilters();
   const modals = useProjectModals();
 
+  // Map status filter to GraphQL ProjectStatus
+  const mapStatusToGraphQL = (status: string): string | undefined => {
+    if (status === "all") return undefined;
+    const statusMap: Record<string, string> = {
+      "active": "IN_PROGRESS",
+      "hold": "ON_HOLD",
+      "completed": "COMPLETED",
+      "blocked": "BLOCKED",
+    };
+    return statusMap[status];
+  };
+
   // Fetch projects with filters and pagination
-  const { data: projectsData = { data: [], meta: { totalItems: 0 } }, isLoading } = useGetProjects({
-    search: filters.searchTerm || undefined,
-    status: filters.statusFilter !== "all" ? filters.statusFilter : undefined,
-    range: filters.rangeFilter,
-    page: filters.pagination.current,
-    pageSize: filters.pagination.pageSize,
+  const { data: projectsData, isLoading } = useGetProjects({
+    input: {
+      search: filters.searchTerm || undefined,
+      status: filters.statusFilter !== "all" ? mapStatusToGraphQL(filters.statusFilter) as any : undefined,
+      range: filters.rangeFilter,
+      page: filters.pagination.current,
+      take: filters.pagination.pageSize,
+    },
   });
+
+  const projectsDataWithDefaults = projectsData || { 
+    data: [], 
+    meta: { 
+      totalItems: 0, 
+      page: 1, 
+      take: 5, 
+      totalPages: 0, 
+      hasPreviousPage: false, 
+      hasNextPage: false 
+    } 
+  };
 
   // Form submission
   const { handleFormSubmit, isLoading: isFormLoading } = useProjectForm({
@@ -41,15 +68,35 @@ export const Projects = ({ children}: ProjectsProviderProps) => {
     onSuccess: modals.closeForm,
   });
 
+  // Map GraphQL Project to ProjectRecord
+  const mapProjectToRecord = (project: any): ProjectRecord => {
+    const statusMap: Record<string, ProjectRecord["status"]> = {
+      "IN_PROGRESS": "In Progress",
+      "ON_HOLD": "On Hold",
+      "COMPLETED": "Completed",
+      "BLOCKED": "Blocked",
+    };
+    
+    return {
+      key: project.id,
+      projectCode: project.projectCode,
+      name: project.name,
+      owner: project.owner,
+      status: statusMap[project.status] || "In Progress",
+      dueDate: typeof project.dueDate === 'string' ? project.dueDate : project.dueDate.toISOString().split('T')[0],
+      tickets: project.tickets,
+    };
+  };
+
   // Context value
   const contextValue: ProjectsContextValue = {
-    projects: projectsData.data,
+    projects: projectsDataWithDefaults.data.map(mapProjectToRecord),
     isLoading,
     pagination: {
       ...filters.pagination,
-      total: projectsData.meta.totalItems,
+      total: projectsDataWithDefaults.meta.totalItems,
     },
-    projectsCount: projectsData.meta.totalItems,
+    projectsCount: projectsDataWithDefaults.meta.totalItems,
     rangeFilter: filters.rangeFilter,
     onTableChange: filters.handleTableChange,
     openDetails: modals.openDetails,

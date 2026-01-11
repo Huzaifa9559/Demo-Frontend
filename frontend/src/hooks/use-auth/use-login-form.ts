@@ -1,8 +1,7 @@
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setCredentials } from "@/store";
-import { useLogin } from "@/services/api-call-hooks/auth";
-import { getErrorMessage } from "@utils";
+import { useLogin } from "@/services/graphql/hooks";
 import type { LoginCredentials } from "@/types/user";
 
 export const useLoginForm = () => {
@@ -12,13 +11,13 @@ export const useLoginForm = () => {
   const loginMutation = useLogin();
 
   const handleLogin = async (credentials: LoginCredentials) => {
-    try {
-      const response = await loginMutation.mutateAsync(credentials);
-      dispatch(setCredentials(response));
-      toast.success(`Welcome back, ${response.user.name}!`);
-    } catch (error: unknown) {
-      const errorMessage = getErrorMessage(error) || "Invalid email or password. Please try again.";
-      toast.error(errorMessage);
+    const result = await loginMutation.mutateAsync(credentials);
+    
+    if (result.success) {
+      dispatch(setCredentials(result.data));
+      toast.success(`Welcome back, ${result.data.user.name}!`);
+    } else {
+      toast.error(result.error.message || "Invalid email or password. Please try again.");
     }
   };
 

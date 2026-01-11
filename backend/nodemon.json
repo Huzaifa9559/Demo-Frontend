@@ -1,0 +1,9 @@
+{
+  "watch": ["src"],
+  "ext": "ts,graphql",
+  "ignore": ["src/**/*.spec.ts", "node_modules", "src/**/*.graphql.types.ts"],
+  "exec": "nest start",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

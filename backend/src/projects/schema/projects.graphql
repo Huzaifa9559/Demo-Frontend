@@ -1,0 +1,80 @@
+# Scalars used by projects module
+scalar DateTime
+scalar NonEmptyString
+scalar NonNegativeInt
+
+# Projects module types
+"""
+Project status enum
+"""
+enum ProjectStatus {
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  BLOCKED
+}
+
+type Project {
+  id: ID!
+  projectCode: String!
+  name: String!
+  owner: String!
+  status: ProjectStatus!
+  dueDate: DateTime!
+  tickets: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+input CreateProjectInput {
+  projectCode: NonEmptyString!
+  name: NonEmptyString!
+  owner: NonEmptyString!
+  status: ProjectStatus!
+  dueDate: DateTime!
+  tickets: NonNegativeInt!
+}
+
+input UpdateProjectInput {
+  projectCode: NonEmptyString
+  name: NonEmptyString
+  owner: NonEmptyString
+  status: ProjectStatus
+  dueDate: DateTime
+  tickets: NonNegativeInt
+}
+
+input ProjectsQueryInput {
+  search: String
+  status: ProjectStatus
+  range: String
+  page: Int
+  take: Int
+  sortBy: String
+  sortOrder: String
+}
+
+type PaginationMeta {
+  page: Int!
+  take: Int!
+  totalItems: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
+type ProjectsOutput {
+  data: [Project!]!
+  meta: PaginationMeta!
+}
+
+type Query {
+  projects(input: ProjectsQueryInput): ProjectsOutput!
+  project(id: ID!): Project!
+}
+
+type Mutation {
+  createProject(input: CreateProjectInput!): Project!
+  updateProject(id: ID!, input: UpdateProjectInput!): Project!
+  deleteProject(id: ID!): Boolean!
+}

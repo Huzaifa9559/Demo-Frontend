@@ -7,8 +7,16 @@ import { APP_FILTER } from '@nestjs/core';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { ProjectsModule } from '../projects/projects.module';
-import { ResourcesModule } from '../resources/resources.module';
-import { AuthResolver } from './resolvers';
+import { AuthResolver } from '../auth/auth.resolver';
+import { ProjectsResolver } from '../projects/projects.resolver';
+import {
+  DateTimeScalar,
+  EmailScalar,
+  NonEmptyStringScalar,
+  PositiveIntScalar,
+  NonNegativeIntScalar,
+  PasswordScalar,
+} from './common/scalars';
 import { GraphqlExceptionFilter } from '../common/filters/graphql-exception.filter';
 
 @Module({
@@ -25,8 +33,20 @@ import { GraphqlExceptionFilter } from '../common/filters/graphql-exception.filt
           configService.get<boolean>('graphql.introspection') ?? true;
 
         return {
-          autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-          sortSchema: true,
+          // Scan all module folders for GraphQL schema files
+          // Order matters: shared schemas first, then module schemas
+          typePaths: [
+            join(process.cwd(), 'src/graphql/common/schema/**/*.graphql'), // Shared scalars first
+            join(process.cwd(), 'src/users/schema/**/*.graphql'), // User type
+            join(process.cwd(), 'src/**/schema/**/*.graphql'), // Module schemas
+          ],
+          // Type generation is handled by graphql-codegen (see codegen.yml)
+          // Types are generated per module in their respective folders
+          // definitions: {
+          //   path: join(process.cwd(), 'src/graphql/graphql-types.ts'),
+          // },
+          // No manual resolvers - NestJS will auto-discover from @Query/@Mutation decorators
+          // Schema is still defined in SDL files (SDL-first)
           playground,
           introspection,
           path: graphqlPath,
@@ -52,10 +72,16 @@ import { GraphqlExceptionFilter } from '../common/filters/graphql-exception.filt
     AuthModule,
     UsersModule,
     ProjectsModule,
-    ResourcesModule,
   ],
   providers: [
     AuthResolver,
+    ProjectsResolver,
+    DateTimeScalar,
+    EmailScalar,
+    NonEmptyStringScalar,
+    PositiveIntScalar,
+    NonNegativeIntScalar,
+    PasswordScalar,
     {
       provide: APP_FILTER,
       useClass: GraphqlExceptionFilter,
