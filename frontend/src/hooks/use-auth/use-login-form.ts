@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setCredentials } from "@/store";
-import { useLogin } from "@/services/graphql/hooks";
+import { useLogin } from "@services";
 import type { LoginCredentials } from "@/types/user";
 
 export const useLoginForm = () => {

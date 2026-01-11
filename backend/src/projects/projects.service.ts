@@ -5,7 +5,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Project as ProjectEntity, ProjectStatus as EntityProjectStatus } from './entities/project.entity';
+import {
+  Project as ProjectEntity,
+  ProjectStatus as EntityProjectStatus,
+} from './entities/project.entity';
 import {
   CreateProjectInput,
   UpdateProjectInput,
@@ -13,13 +16,9 @@ import {
   ProjectStatus,
   Project as GraphQLProject,
   ProjectsOutput,
-  PaginationMeta,
 } from './projects.graphql.types';
 import * as dayjs from 'dayjs';
-import {
-  PaginatedResponse,
-  buildPaginationMeta,
-} from '../common/utils/response.util';
+import { buildPaginationMeta } from '@/common/utils/response.util';
 
 @Injectable()
 export class ProjectsService {
@@ -30,10 +29,10 @@ export class ProjectsService {
 
   private mapGraphQLStatusToEntity(status: ProjectStatus): EntityProjectStatus {
     const statusMap: Record<ProjectStatus, EntityProjectStatus> = {
-      'IN_PROGRESS': EntityProjectStatus.IN_PROGRESS,
-      'ON_HOLD': EntityProjectStatus.ON_HOLD,
-      'COMPLETED': EntityProjectStatus.COMPLETED,
-      'BLOCKED': EntityProjectStatus.BLOCKED,
+      IN_PROGRESS: EntityProjectStatus.IN_PROGRESS,
+      ON_HOLD: EntityProjectStatus.ON_HOLD,
+      COMPLETED: EntityProjectStatus.COMPLETED,
+      BLOCKED: EntityProjectStatus.BLOCKED,
     };
     return statusMap[status] || EntityProjectStatus.IN_PROGRESS;
   }
@@ -75,7 +74,9 @@ export class ProjectsService {
     // Status filter
     if (graphqlStatus) {
       const entityStatus = this.mapGraphQLStatusToEntity(graphqlStatus);
-      queryBuilder.andWhere('project.status = :status', { status: entityStatus });
+      queryBuilder.andWhere('project.status = :status', {
+        status: entityStatus,
+      });
     }
 
     // Range filter
@@ -89,18 +90,27 @@ export class ProjectsService {
       const rangeEnd = rangeEndMap[rangeFilter];
       if (rangeEnd) {
         const rangeStart = now.subtract(1, 'day');
-        queryBuilder.andWhere('project.dueDate BETWEEN :rangeStart AND :rangeEnd', {
-          rangeStart: rangeStart.toDate(),
-          rangeEnd: rangeEnd.toDate(),
-        });
+        queryBuilder.andWhere(
+          'project.dueDate BETWEEN :rangeStart AND :rangeEnd',
+          {
+            rangeStart: rangeStart.toDate(),
+            rangeEnd: rangeEnd.toDate(),
+          },
+        );
       }
     }
 
     // Sorting
-    const sortColumn = sortBy === 'dueDate' ? 'dueDate' : 
-                      sortBy === 'createdAt' ? 'createdAt' : 
-                      'projectCode';
-    queryBuilder.orderBy(`project.${sortColumn}`, sortOrder.toUpperCase() as 'ASC' | 'DESC');
+    const sortColumn =
+      sortBy === 'dueDate'
+        ? 'dueDate'
+        : sortBy === 'createdAt'
+          ? 'createdAt'
+          : 'projectCode';
+    queryBuilder.orderBy(
+      `project.${sortColumn}`,
+      sortOrder.toUpperCase() as 'ASC' | 'DESC',
+    );
 
     // Pagination
     const skip = (page - 1) * itemsPerPage;
@@ -116,10 +126,20 @@ export class ProjectsService {
       name: project.name,
       owner: project.owner,
       status: this.mapEntityStatusToGraphQL(project.status),
-      dueDate: project.dueDate,
+      dueDate:
+        project.dueDate instanceof Date
+          ? project.dueDate
+          : new Date(project.dueDate),
       tickets: project.tickets,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt || undefined,
+      createdAt:
+        project.createdAt instanceof Date
+          ? project.createdAt
+          : new Date(project.createdAt),
+      updatedAt: project.updatedAt
+        ? project.updatedAt instanceof Date
+          ? project.updatedAt
+          : new Date(project.updatedAt)
+        : undefined,
     }));
 
     return {
@@ -149,10 +169,20 @@ export class ProjectsService {
       name: project.name,
       owner: project.owner,
       status: this.mapEntityStatusToGraphQL(project.status),
-      dueDate: project.dueDate,
+      dueDate:
+        project.dueDate instanceof Date
+          ? project.dueDate
+          : new Date(project.dueDate),
       tickets: project.tickets,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt || undefined,
+      createdAt:
+        project.createdAt instanceof Date
+          ? project.createdAt
+          : new Date(project.createdAt),
+      updatedAt: project.updatedAt
+        ? project.updatedAt instanceof Date
+          ? project.updatedAt
+          : new Date(project.updatedAt)
+        : undefined,
     };
   }
 
@@ -171,7 +201,8 @@ export class ProjectsService {
       name: input.name,
       owner: input.owner,
       status: this.mapGraphQLStatusToEntity(input.status),
-      dueDate: input.dueDate instanceof Date ? input.dueDate : new Date(input.dueDate),
+      dueDate:
+        input.dueDate instanceof Date ? input.dueDate : new Date(input.dueDate),
       tickets: input.tickets,
     });
 
@@ -184,10 +215,18 @@ export class ProjectsService {
       name: saved.name,
       owner: saved.owner,
       status: this.mapEntityStatusToGraphQL(saved.status),
-      dueDate: saved.dueDate,
+      dueDate:
+        saved.dueDate instanceof Date ? saved.dueDate : new Date(saved.dueDate),
       tickets: saved.tickets,
-      createdAt: saved.createdAt,
-      updatedAt: saved.updatedAt || undefined,
+      createdAt:
+        saved.createdAt instanceof Date
+          ? saved.createdAt
+          : new Date(saved.createdAt),
+      updatedAt: saved.updatedAt
+        ? saved.updatedAt instanceof Date
+          ? saved.updatedAt
+          : new Date(saved.updatedAt)
+        : undefined,
     };
   }
 
@@ -210,12 +249,15 @@ export class ProjectsService {
     }
 
     // Update fields
-    if (input.projectCode !== undefined) project.projectCode = input.projectCode;
+    if (input.projectCode !== undefined)
+      project.projectCode = input.projectCode;
     if (input.name !== undefined) project.name = input.name;
     if (input.owner !== undefined) project.owner = input.owner;
-    if (input.status !== undefined) project.status = this.mapGraphQLStatusToEntity(input.status);
+    if (input.status !== undefined)
+      project.status = this.mapGraphQLStatusToEntity(input.status);
     if (input.dueDate !== undefined) {
-      project.dueDate = input.dueDate instanceof Date ? input.dueDate : new Date(input.dueDate);
+      project.dueDate =
+        input.dueDate instanceof Date ? input.dueDate : new Date(input.dueDate);
     }
     if (input.tickets !== undefined) project.tickets = input.tickets;
 
@@ -228,10 +270,20 @@ export class ProjectsService {
       name: updated.name,
       owner: updated.owner,
       status: this.mapEntityStatusToGraphQL(updated.status),
-      dueDate: updated.dueDate,
+      dueDate:
+        updated.dueDate instanceof Date
+          ? updated.dueDate
+          : new Date(updated.dueDate),
       tickets: updated.tickets,
-      createdAt: updated.createdAt,
-      updatedAt: updated.updatedAt || undefined,
+      createdAt:
+        updated.createdAt instanceof Date
+          ? updated.createdAt
+          : new Date(updated.createdAt),
+      updatedAt: updated.updatedAt
+        ? updated.updatedAt instanceof Date
+          ? updated.updatedAt
+          : new Date(updated.updatedAt)
+        : undefined,
     };
   }
 
@@ -245,4 +297,3 @@ export class ProjectsService {
     await this.projectsRepository.remove(project);
   }
 }
-

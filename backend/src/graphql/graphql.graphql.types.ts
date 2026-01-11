@@ -12,18 +12,11 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: { input: Date; output: Date; }
-  /** Email scalar type - validates email format (e.g., user@example.com) */
   Email: { input: string; output: string; }
-  /** Non-empty string scalar - validates that string is not empty or whitespace */
   NonEmptyString: { input: string; output: string; }
-  /** Non-negative integer scalar - validates that integer is >= 0 */
   NonNegativeInt: { input: number; output: number; }
-  /** Password scalar - validates minimum length of 6 characters */
   Password: { input: string; output: string; }
-  /** Positive integer scalar - validates that integer is greater than 0 */
-  PositiveInt: { input: number; output: number; }
 };
 
 export type AuthPayload = {
@@ -49,8 +42,11 @@ export type Mutation = {
   createProject: Project;
   deleteProject: Scalars['Boolean']['output'];
   login: AuthPayload;
+  requestOtp: RequestOtpResponse;
+  resetPassword: ResetPasswordResponse;
   signup: AuthPayload;
   updateProject: Project;
+  verifyOtp: VerifyOtpResponse;
 };
 
 
@@ -69,6 +65,16 @@ export type MutationLoginArgs = {
 };
 
 
+export type MutationRequestOtpArgs = {
+  input: RequestOtpInput;
+};
+
+
+export type MutationResetPasswordArgs = {
+  input: ResetPasswordInput;
+};
+
+
 export type MutationSignupArgs = {
   input: SignupInput;
 };
@@ -77,6 +83,11 @@ export type MutationSignupArgs = {
 export type MutationUpdateProjectArgs = {
   id: Scalars['ID']['input'];
   input: UpdateProjectInput;
+};
+
+
+export type MutationVerifyOtpArgs = {
+  input: VerifyOtpInput;
 };
 
 export type PaginationMeta = {
@@ -138,6 +149,25 @@ export type QueryProjectsArgs = {
   input?: InputMaybe<ProjectsQueryInput>;
 };
 
+export type RequestOtpInput = {
+  email: Scalars['Email']['input'];
+};
+
+export type RequestOtpResponse = {
+  message: Scalars['String']['output'];
+  otp?: Maybe<Scalars['String']['output']>;
+};
+
+export type ResetPasswordInput = {
+  email: Scalars['Email']['input'];
+  newPassword: Scalars['Password']['input'];
+  otp: Scalars['NonEmptyString']['input'];
+};
+
+export type ResetPasswordResponse = {
+  message: Scalars['String']['output'];
+};
+
 export type SignupInput = {
   email: Scalars['Email']['input'];
   name: Scalars['NonEmptyString']['input'];
@@ -167,3 +197,12 @@ export type User = {
 export type UserRole =
   | 'admin'
   | 'user';
+
+export type VerifyOtpInput = {
+  email: Scalars['Email']['input'];
+  otp: Scalars['NonEmptyString']['input'];
+};
+
+export type VerifyOtpResponse = {
+  message: Scalars['String']['output'];
+};

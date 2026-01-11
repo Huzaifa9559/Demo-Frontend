@@ -43,5 +43,20 @@ export class AuthResolver {
       updatedAt: userEntity.updatedAt || undefined,
     };
   }
+
+  @Mutation()
+  async requestOtp(@Args('input') input: { email: string }) {
+    return await this.authService.requestOtp(input);
+  }
+
+  @Mutation()
+  async verifyOtp(@Args('input') input: { email: string; otp: string }) {
+    return await this.authService.verifyOtp(input);
+  }
+
+  @Mutation()
+  async resetPassword(@Args('input') input: { email: string; otp: string; newPassword: string }) {
+    return await this.authService.resetPassword(input);
+  }
 }
 

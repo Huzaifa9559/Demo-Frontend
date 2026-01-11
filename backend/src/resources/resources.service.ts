@@ -1,69 +1,44 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Resource, ResourceType, ResourceStatus } from './entities/resource.entity';
-import { CreateResourceDto } from './dto/create-resource.dto';
-import { UpdateResourceDto } from './dto/update-resource.dto';
-import { QueryResourcesDto, SortBy, SortOrder } from './dto/query-resources.dto';
 import {
-  PaginatedResponse,
-  buildPaginationMeta,
-} from '../common/utils/response.util';
-
-export interface ResourceRecord {
-  key: string;
-  title: string;
-  description: string | null;
-  type: ResourceType;
-  category: string | null;
-  url: string;
-  tags: string[];
-  status: ResourceStatus;
-  author: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+  Resource as ResourceEntity,
+  ResourceType as EntityResourceType,
+  ResourceStatus as EntityResourceStatus,
+} from './entities/resource.entity';
+import {
+  CreateResourceInput,
+  UpdateResourceInput,
+  ResourcesQueryInput,
+  ResourceType,
+  ResourceStatus,
+  Resource as GraphQLResource,
+  ResourcesOutput,
+} from './resources.graphql.types';
+import { buildPaginationMeta } from '../common/utils/response.util';
 
 @Injectable()
 export class ResourcesService {
   constructor(
-    @InjectRepository(Resource)
-    private resourcesRepository: Repository<Resource>,
+    @InjectRepository(ResourceEntity)
+    private resourcesRepository: Repository<ResourceEntity>,
   ) {}
 
-  private mapToResourceRecord(resource: Resource): ResourceRecord {
-    return {
-      key: resource.id,
-      title: resource.title,
-      description: resource.description,
-      type: resource.type,
-      category: resource.category,
-      url: resource.url,
-      tags: resource.tags,
-      status: resource.status,
-      author: resource.author,
-      createdAt: resource.createdAt.toISOString(),
-      updatedAt: resource.updatedAt.toISOString(),
-    };
-  }
-
-  async findAll(queryDto: QueryResourcesDto): Promise<PaginatedResponse<ResourceRecord>> {
+  async findAll(input?: ResourcesQueryInput): Promise<ResourcesOutput> {
     const {
       search,
-      type,
+      type: graphqlType,
       category,
-      status,
+      status: graphqlStatus,
       tag,
       page = 1,
       pageSize = 10,
-      sortBy = SortBy.CREATED_AT,
-      sortOrder = SortOrder.DESC,
-    } = queryDto;
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = input || {};
 
-    const queryBuilder = this.resourcesRepository.createQueryBuilder('resource');
+    const queryBuilder =
+      this.resourcesRepository.createQueryBuilder('resource');
 
     // Search filter
     if (search) {
@@ -75,8 +50,10 @@ export class ResourcesService {
     }
 
     // Type filter
-    if (type) {
-      queryBuilder.andWhere('resource.type = :type', { type });
+    if (graphqlType) {
+      queryBuilder.andWhere('resource.type = :type', {
+        type: graphqlType as EntityResourceType,
+      });
     }
 
     // Category filter
@@ -85,8 +62,10 @@ export class ResourcesService {
     }
 
     // Status filter
-    if (status) {
-      queryBuilder.andWhere('resource.status = :status', { status });
+    if (graphqlStatus) {
+      queryBuilder.andWhere('resource.status = :status', {
+        status: graphqlStatus as EntityResourceStatus,
+      });
     }
 
     // Tag filter
@@ -95,61 +74,165 @@ export class ResourcesService {
     }
 
     // Sorting
-    const sortColumn = sortBy === SortBy.TITLE ? 'title' : 
-                      sortBy === SortBy.TYPE ? 'type' : 
-                      'createdAt';
-    queryBuilder.orderBy(`resource.${sortColumn}`, sortOrder.toUpperCase() as 'ASC' | 'DESC');
+    const sortColumn =
+      sortBy === 'title' ? 'title' : sortBy === 'type' ? 'type' : 'createdAt';
+    queryBuilder.orderBy(
+      `resource.${sortColumn}`,
+      sortOrder.toUpperCase() as 'ASC' | 'DESC',
+    );
 
     // Pagination
     const skip = (page - 1) * pageSize;
     queryBuilder.skip(skip).take(pageSize);
 
     const [resources, totalItems] = await queryBuilder.getManyAndCount();
-
-    const resourceRecords = resources.map((r) => this.mapToResourceRecord(r));
     const meta = buildPaginationMeta(page, pageSize, totalItems);
 
+    // Map entities to GraphQL types
+    const graphqlResources = resources.map((resource) => ({
+      key: resource.id,
+      title: resource.title,
+      description: resource.description,
+      type: resource.type as ResourceType,
+      category: resource.category,
+      url: resource.url,
+      tags: resource.tags,
+      status: resource.status as ResourceStatus,
+      author: resource.author,
+      createdAt:
+        resource.createdAt instanceof Date
+          ? resource.createdAt
+          : new Date(resource.createdAt),
+      updatedAt:
+        resource.updatedAt instanceof Date
+          ? resource.updatedAt
+          : new Date(resource.updatedAt),
+    }));
+
     return {
-      data: resourceRecords,
-      meta,
+      data: graphqlResources,
+      meta: {
+        page: meta.page,
+        take: meta.take,
+        totalItems: meta.totalItems,
+        totalPages: meta.totalPages,
+        hasPreviousPage: meta.hasPreviousPage,
+        hasNextPage: meta.hasNextPage,
+      },
     };
   }
 
-  async findOne(id: string): Promise<ResourceRecord> {
+  async findOne(id: string): Promise<GraphQLResource> {
     const resource = await this.resourcesRepository.findOne({ where: { id } });
 
     if (!resource) {
       throw new NotFoundException('Resource not found');
     }
 
-    return this.mapToResourceRecord(resource);
+    // Map entity to GraphQL type
+    return {
+      key: resource.id,
+      title: resource.title,
+      description: resource.description,
+      type: resource.type as ResourceType,
+      category: resource.category,
+      url: resource.url,
+      tags: resource.tags,
+      status: resource.status as ResourceStatus,
+      author: resource.author,
+      createdAt:
+        resource.createdAt instanceof Date
+          ? resource.createdAt
+          : new Date(resource.createdAt),
+      updatedAt:
+        resource.updatedAt instanceof Date
+          ? resource.updatedAt
+          : new Date(resource.updatedAt),
+    };
   }
 
-  async create(createResourceDto: CreateResourceDto): Promise<ResourceRecord> {
+  async create(input: CreateResourceInput): Promise<GraphQLResource> {
     const resource = this.resourcesRepository.create({
-      ...createResourceDto,
-      tags: createResourceDto.tags || [],
-      status: createResourceDto.status || ResourceStatus.ACTIVE,
+      title: input.title,
+      description: input.description,
+      type: input.type as EntityResourceType,
+      category: input.category,
+      url: input.url,
+      tags: input.tags || [],
+      status:
+        (input.status as EntityResourceStatus) || EntityResourceStatus.ACTIVE,
+      author: input.author,
     });
 
     const saved = await this.resourcesRepository.save(resource);
-    return this.mapToResourceRecord(saved);
+
+    // Map entity to GraphQL type
+    return {
+      key: saved.id,
+      title: saved.title,
+      description: saved.description,
+      type: saved.type as ResourceType,
+      category: saved.category,
+      url: saved.url,
+      tags: saved.tags,
+      status: saved.status as ResourceStatus,
+      author: saved.author,
+      createdAt:
+        saved.createdAt instanceof Date
+          ? saved.createdAt
+          : new Date(saved.createdAt),
+      updatedAt:
+        saved.updatedAt instanceof Date
+          ? saved.updatedAt
+          : new Date(saved.updatedAt),
+    };
   }
 
   async update(
     id: string,
-    updateResourceDto: UpdateResourceDto,
-  ): Promise<ResourceRecord> {
+    input: UpdateResourceInput,
+  ): Promise<GraphQLResource> {
     const resource = await this.resourcesRepository.findOne({ where: { id } });
 
     if (!resource) {
       throw new NotFoundException('Resource not found');
     }
 
-    Object.assign(resource, updateResourceDto);
+    // Update fields
+    if (input.title !== undefined) resource.title = input.title;
+    if (input.description !== undefined)
+      resource.description = input.description;
+    if (input.type !== undefined)
+      resource.type = input.type as EntityResourceType;
+    if (input.category !== undefined) resource.category = input.category;
+    if (input.url !== undefined) resource.url = input.url;
+    if (input.tags !== undefined) resource.tags = input.tags;
+    if (input.status !== undefined)
+      resource.status = input.status as EntityResourceStatus;
+    if (input.author !== undefined) resource.author = input.author;
 
     const updated = await this.resourcesRepository.save(resource);
-    return this.mapToResourceRecord(updated);
+
+    // Map entity to GraphQL type
+    return {
+      key: updated.id,
+      title: updated.title,
+      description: updated.description,
+      type: updated.type as ResourceType,
+      category: updated.category,
+      url: updated.url,
+      tags: updated.tags,
+      status: updated.status as ResourceStatus,
+      author: updated.author,
+      createdAt:
+        updated.createdAt instanceof Date
+          ? updated.createdAt
+          : new Date(updated.createdAt),
+      updatedAt:
+        updated.updatedAt instanceof Date
+          ? updated.updatedAt
+          : new Date(updated.updatedAt),
+    };
   }
 
   async remove(id: string): Promise<void> {
@@ -162,4 +245,3 @@ export class ResourcesService {
     await this.resourcesRepository.remove(resource);
   }
 }
-

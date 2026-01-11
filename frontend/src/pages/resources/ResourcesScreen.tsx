@@ -50,7 +50,12 @@ export const ResourcesScreen = () => {
   // Delete handler
   const handleDelete = useCallback(async (resource: ResourceRecord) => {
     try {
-      await deleteResource.mutateAsync(resource.key);
+      const result = await deleteResource.mutateAsync(resource.key);
+      
+      if (!result.success) {
+        throw new Error(result.error?.message || "Failed to delete resource");
+      }
+      
       toaster.success({ message: "Resource deleted successfully" });
     } catch (error) {
       toaster.error({ message: getErrorMessage(error) });

@@ -3,7 +3,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import type { ResourceRecord, ResourceType, ResourceStatus } from '@/types/resource';
 import { RESOURCE_TYPE_OPTIONS, RESOURCE_STATUS_OPTIONS } from '@/types/resource';
-import type { CreateResourcePayload } from '@/services/api-call-hooks/resources';
+import type { CreateResourcePayload } from '@/services/api-calls-hooks/resources';
 
 const { TextArea } = Input;
 

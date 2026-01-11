@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setCredentials } from "@/store";
-import { useSignup } from "@/services/graphql/hooks";
+import { useSignup } from "@services";
 import { getErrorMessage } from "@utils";
 import type { SignupCredentials } from "@/types/user";
 

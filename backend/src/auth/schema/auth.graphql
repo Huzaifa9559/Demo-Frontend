@@ -42,8 +42,39 @@ type Query {
   me: User!
 }
 
+input RequestOtpInput {
+  email: Email!
+}
+
+type RequestOtpResponse {
+  message: String!
+  otp: String
+}
+
+input VerifyOtpInput {
+  email: Email!
+  otp: NonEmptyString!
+}
+
+type VerifyOtpResponse {
+  message: String!
+}
+
+input ResetPasswordInput {
+  email: Email!
+  otp: NonEmptyString!
+  newPassword: Password!
+}
+
+type ResetPasswordResponse {
+  message: String!
+}
+
 type Mutation {
   signup(input: SignupInput!): AuthPayload!
   login(input: LoginInput!): AuthPayload!
+  requestOtp(input: RequestOtpInput!): RequestOtpResponse!
+  verifyOtp(input: VerifyOtpInput!): VerifyOtpResponse!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordResponse!
 }
 

@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useFormik } from "formik";
 import { FormValidator, FormInitials, type ProjectFormInitialValues } from "@utils";
 import { useProjectsContext } from "../context/ProjectsContext";
-import { useEffect } from "react";
+import { useMemo } from "react";
 import type { ProjectRecord } from "@/types";
 
 export type ProjectFormValues = ProjectFormInitialValues;
@@ -35,13 +35,26 @@ export const ProjectFormModal = ({
   const isOpen = isFormOpen && (formMode === "create" || formMode === "edit");
   const isEditMode = formMode === "edit";
 
+  // Memoize initial values to prevent infinite loops
+  const initialValues = useMemo(() => {
+    if (isEditMode && selectedProject) {
+      // Parse date - dueDate comes as YYYY-MM-DD from backend
+      const dueDate = selectedProject.dueDate 
+        ? dayjs(selectedProject.dueDate, ["YYYY-MM-DD", "MMM D, YYYY"]).isValid()
+          ? dayjs(selectedProject.dueDate, ["YYYY-MM-DD", "MMM D, YYYY"])
+          : null
+        : null;
+      
+      return {
+        ...FormInitials.projectFormInitials(selectedProject),
+        dueDate,
+      };
+    }
+    return FormInitials.projectFormInitials();
+  }, [isEditMode, selectedProject?.key]); // Use key instead of whole object
+
   const formik = useFormik<ProjectFormValues>({
-    initialValues: isEditMode && selectedProject
-      ? {
-          ...FormInitials.projectFormInitials(selectedProject),
-          dueDate: dayjs(selectedProject.dueDate, "MMM D, YYYY"),
-        }
-      : FormInitials.projectFormInitials(),
+    initialValues,
     validationSchema: FormValidator.projectFormValidationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
@@ -49,19 +62,6 @@ export const ProjectFormModal = ({
       formik.resetForm();
     },
   });
-
-  useEffect(() => {
-    if (isOpen) {
-      if (isEditMode && selectedProject) {
-        formik.setValues({
-          ...FormInitials.projectFormInitials(selectedProject),
-          dueDate: dayjs(selectedProject.dueDate, "MMM D, YYYY"),
-        });
-      } else {
-        formik.setValues(FormInitials.projectFormInitials());
-      }
-    }
-  }, [isOpen, isEditMode, selectedProject]);
 
   const handleOk = async () => {
     await formik.submitForm();

@@ -30,6 +30,19 @@ generates:
         NonEmptyString: string
         NonNegativeInt: number
 
+  # Generate types for resources module - only from resources/schema/
+  src/resources/resources.graphql.types.ts:
+    schema:
+      - 'src/resources/schema/**/*.graphql'
+    plugins:
+      - typescript
+    config:
+      enumsAsTypes: true
+      skipTypename: true
+      scalars:
+        DateTime: Date
+        NonEmptyString: string
+
   # Generate shared types in graphql folder (for backward compatibility) - all schemas
   src/graphql/graphql.graphql.types.ts:
     schema:
@@ -37,6 +50,7 @@ generates:
       - 'src/users/schema/**/*.graphql'
       - 'src/auth/schema/**/*.graphql'
       - 'src/projects/schema/**/*.graphql'
+      - 'src/resources/schema/**/*.graphql'
     plugins:
       - typescript
     config:

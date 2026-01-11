@@ -27,10 +27,7 @@ export class GraphqlExceptionFilter
   implements ExceptionFilter, GqlExceptionFilter
 {
   catch(exception: unknown, host?: ArgumentsHost): GraphQLError {
-    // Skip HTTP context - let HttpExceptionFilter handle it
-    if (host && host.getType && host.getType() === 'http') {
-      throw exception;
-    }
+    // All requests are GraphQL - no HTTP context handling needed
     // Handle HttpException (from ValidationPipe, service layer, etc.)
     if (exception instanceof HttpException) {
       const status = exception.getStatus();

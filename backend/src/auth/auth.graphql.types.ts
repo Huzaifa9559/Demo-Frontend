@@ -30,7 +30,10 @@ export type LoginInput = {
 
 export type Mutation = {
   login: AuthPayload;
+  requestOtp: RequestOtpResponse;
+  resetPassword: ResetPasswordResponse;
   signup: AuthPayload;
+  verifyOtp: VerifyOtpResponse;
 };
 
 
@@ -39,12 +42,46 @@ export type MutationLoginArgs = {
 };
 
 
+export type MutationRequestOtpArgs = {
+  input: RequestOtpInput;
+};
+
+
+export type MutationResetPasswordArgs = {
+  input: ResetPasswordInput;
+};
+
+
 export type MutationSignupArgs = {
   input: SignupInput;
 };
 
+
+export type MutationVerifyOtpArgs = {
+  input: VerifyOtpInput;
+};
+
 export type Query = {
   me: User;
+};
+
+export type RequestOtpInput = {
+  email: Scalars['Email']['input'];
+};
+
+export type RequestOtpResponse = {
+  message: Scalars['String']['output'];
+  otp?: Maybe<Scalars['String']['output']>;
+};
+
+export type ResetPasswordInput = {
+  email: Scalars['Email']['input'];
+  newPassword: Scalars['Password']['input'];
+  otp: Scalars['NonEmptyString']['input'];
+};
+
+export type ResetPasswordResponse = {
+  message: Scalars['String']['output'];
 };
 
 export type SignupInput = {
@@ -66,3 +103,12 @@ export type User = {
 export type UserRole =
   | 'admin'
   | 'user';
+
+export type VerifyOtpInput = {
+  email: Scalars['Email']['input'];
+  otp: Scalars['NonEmptyString']['input'];
+};
+
+export type VerifyOtpResponse = {
+  message: Scalars['String']['output'];
+};

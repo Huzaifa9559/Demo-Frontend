@@ -1,5 +1,5 @@
 import { ApolloProvider } from '@apollo/client/react';
-import { apolloClient } from '@/services/graphql';
+import { apolloClient } from '@services';
 import type { ReactNode } from 'react';
 
 type Props = {

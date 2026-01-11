@@ -3,7 +3,7 @@ import { toaster } from "@components/ui";
 import { useCreateResource, useUpdateResource } from "@services";
 import { getErrorMessage } from "@utils";
 import type { ResourceRecord } from "@/types/resource";
-import type { CreateResourcePayload } from "@/services/api-call-hooks/resources";
+import type { CreateResourcePayload } from "@/services/api-calls-hooks/resources";
 
 type ResourceFormValues = CreateResourcePayload;
 
@@ -25,13 +25,23 @@ export const useResourceForm = ({
     async (values: ResourceFormValues) => {
       try {
         if (formMode === "edit" && selectedResource) {
-          await updateResource.mutateAsync({
+          const result = await updateResource.mutateAsync({
             payload: values,
             id: selectedResource.key,
           });
+          
+          if (!result.success) {
+            throw new Error(result.error?.message || "Failed to update resource");
+          }
+          
           toaster.success({ message: "Resource updated successfully" });
         } else {
-          await createResource.mutateAsync(values);
+          const result = await createResource.mutateAsync(values);
+          
+          if (!result.success) {
+            throw new Error(result.error?.message || "Failed to create resource");
+          }
+          
           toaster.success({ message: "Resource created successfully" });
         }
         onSuccess?.();
