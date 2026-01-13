@@ -1,0 +1,30 @@
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""
+Email scalar type - validates email format (e.g., user@example.com)
+"""
+scalar Email
+
+"""
+Non-empty string scalar - validates that string is not empty or whitespace
+"""
+scalar NonEmptyString
+
+"""
+Positive integer scalar - validates that integer is greater than 0
+"""
+scalar PositiveInt
+
+"""
+Non-negative integer scalar - validates that integer is >= 0
+"""
+scalar NonNegativeInt
+
+"""
+Password scalar - validates minimum length of 6 characters
+"""
+scalar Password
+

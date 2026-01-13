@@ -1,22 +1,30 @@
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setCredentials } from "@/store";
-import { useSignup } from "@/services/api-call-hooks/auth";
+import { useSignup } from "@services";
+import { getErrorMessage } from "@utils";
 import type { SignupCredentials } from "@/types/user";
 
 export const useSignupForm = () => {
   const dispatch = useAppDispatch();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { isAuthenticated = false } = authState || {};
   const signupMutation = useSignup();
 
   const handleSignup = async (credentials: SignupCredentials) => {
-    try {
-      const response = await signupMutation.mutateAsync(credentials);
-      dispatch(setCredentials(response));
-      toast.success(`Welcome, ${response.user.name}! Account created successfully.`);
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.error || error?.message || "Failed to create account. Please try again.";
-      toast.error(errorMessage);
+    // Default role to 'user' if not provided
+    const signupData = {
+      ...credentials,
+      role: 'user' as const,
+    };
+    
+    const result = await signupMutation.mutateAsync(signupData);
+    
+    if (result.success) {
+      dispatch(setCredentials(result.data));
+      toast.success(`Welcome, ${result.data.user.name}! Account created successfully.`);
+    } else {
+      toast.error(result.error.message || "Failed to create account. Please try again.");
     }
   };
 

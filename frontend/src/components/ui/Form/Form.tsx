@@ -1,12 +1,16 @@
 import { Form as AntForm, type FormProps as AntFormProps } from 'antd'
 import { type ReactNode } from 'react'
 
-export type FormProps<T = any> = AntFormProps<T> & {
+export type FormProps<T = Record<string, unknown>> = AntFormProps<T> & {
   children?: ReactNode
   className?: string
 }
 
-export const Form = <T = any,>({ children, className, ...props }: FormProps<T>) => {
+export const Form = <T extends Record<string, unknown> = Record<string, unknown>>({ 
+  children, 
+  className, 
+  ...props 
+}: FormProps<T>) => {
   return (
     <AntForm className={className} {...props}>
       {children}

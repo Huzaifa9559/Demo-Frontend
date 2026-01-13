@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLoginForm } from '@hooks';
 import { ROUTE_URLS } from '@utils';
-import { LoginForm } from '../components/LoginForm';
+import { LoginForm } from '../presentations/LoginForm';
 
 export const LoginContainer = () => {
   const navigate = useNavigate();

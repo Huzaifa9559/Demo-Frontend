@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import * as path from 'path';
 import { User } from '../users/entities/user.entity';
 import { Project } from '../projects/entities/project.entity';
+import { Resource } from '../resources/entities/resource.entity';
 
 config();
 
@@ -13,7 +14,7 @@ const dataSourceOptions: DataSourceOptions = {
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [User, Project],
+  entities: [User, Project, Resource],
   migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',

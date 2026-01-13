@@ -1,0 +1,108 @@
+# Scalars used by resources module
+scalar DateTime
+scalar NonEmptyString
+
+# Resources module types
+"""
+Resource type enum
+"""
+enum ResourceType {
+  document
+  link
+  file
+  video
+  image
+  other
+}
+
+"""
+Resource status enum
+"""
+enum ResourceStatus {
+  active
+  archived
+}
+
+type Resource {
+  key: ID!
+  title: String!
+  description: String
+  type: ResourceType!
+  category: String
+  url: String!
+  tags: [String!]!
+  status: ResourceStatus!
+  author: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateResourceInput {
+  title: NonEmptyString!
+  description: String
+  type: ResourceType!
+  category: String
+  url: NonEmptyString!
+  tags: [String!]
+  status: ResourceStatus
+  author: String
+}
+
+input UpdateResourceInput {
+  title: NonEmptyString
+  description: String
+  type: ResourceType
+  category: String
+  url: NonEmptyString
+  tags: [String!]
+  status: ResourceStatus
+  author: String
+}
+
+enum ResourceSortBy {
+  title
+  createdAt
+  type
+}
+
+enum SortOrder {
+  asc
+  desc
+}
+
+input ResourcesQueryInput {
+  search: String
+  type: ResourceType
+  status: ResourceStatus
+  category: String
+  tag: String
+  page: Int
+  pageSize: Int
+  sortBy: ResourceSortBy
+  sortOrder: SortOrder
+}
+
+type PaginationMeta {
+  page: Int!
+  take: Int!
+  totalItems: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
+type ResourcesOutput {
+  data: [Resource!]!
+  meta: PaginationMeta!
+}
+
+type Query {
+  resources(input: ResourcesQueryInput): ResourcesOutput!
+  resource(id: ID!): Resource!
+}
+
+type Mutation {
+  createResource(input: CreateResourceInput!): Resource!
+  updateResource(id: ID!, input: UpdateResourceInput!): Resource!
+  deleteResource(id: ID!): Boolean!
+}

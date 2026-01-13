@@ -3,7 +3,6 @@ import * as bcrypt from 'bcrypt';
 import { config } from 'dotenv';
 import { User, UserRole } from '../users/entities/user.entity';
 import { Project } from '../projects/entities/project.entity';
-import { SEED_PROJECTS } from '../projects/seed/projects.seed';
 import dataSource from './data-source';
 
 config();
@@ -39,12 +38,6 @@ async function seed() {
 
     await userRepository.save([adminUser, regularUser]);
     console.log('✓ Users seeded');
-
-    // Seed projects
-    const projectRepository = connection.getRepository(Project);
-    const projects = projectRepository.create(SEED_PROJECTS);
-    await projectRepository.save(projects);
-    console.log('✓ Projects seeded');
 
     console.log('Database seeding completed successfully!');
   } catch (error) {

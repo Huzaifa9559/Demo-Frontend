@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import dayjs from "dayjs";
 import { toaster } from "@components/ui";
 import { useCreateProject, useUpdateProject } from "@services";
+import { getErrorMessage } from "@utils";
 import type { ProjectRecord } from "@/types";
 
 type ProjectFormValues = {
@@ -41,8 +42,8 @@ export const useProjectForm = ({
       try {
         if (formMode === "edit" && selectedProject) {
           await updateProject.mutateAsync({
-            id: selectedProject.key,
             payload: normalizedProject,
+            id: selectedProject.key,
           });
           toaster.success({ message: "Project updated successfully" });
         } else {
@@ -51,15 +52,15 @@ export const useProjectForm = ({
         }
         onSuccess?.();
       } catch (error) {
-        toaster.error({
-          message: "Failed to save project",
-          description: String(error),
-        });
-        throw error;
+        toaster.error({ message: getErrorMessage(error) });
       }
     },
     [formMode, selectedProject, createProject, updateProject, onSuccess]
   );
 
-  return { handleFormSubmit };
+  const isLoading = formMode === "edit" 
+    ? updateProject.isPending 
+    : createProject.isPending;
+
+  return { handleFormSubmit, isLoading };
 };

@@ -1,16 +1,103 @@
-# React + Vite
+# Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React application with E2E testing using BDD (Cucumber) and Playwright.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-## React Compiler
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. **Run E2E tests:**
+   ```bash
+   npm run test:e2e          # Headless mode
+   npm run test:e2e:headed    # Visible browser
+   ```
 
-## Expanding the ESLint configuration
+## E2E Testing
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project uses Behavior-Driven Development (BDD) with Cucumber and Page Object Model (POM) pattern.
+
+### Test Structure
+
+```
+e2e/
+├── tests/
+│   ├── features/         # Gherkin feature files
+│   ├── step-definitions/ # Step definitions (auth.steps.ts)
+│   ├── pages/            # Page Object Model classes
+│   ├── locators/         # Reusable selectors
+│   └── utils/            # Test utilities and hooks
+├── run-tests.ts          # Test runner
+└── tsconfig.json         # TypeScript config
+```
+
+### Running Tests
+
+From the `frontend` directory:
+
+```bash
+# Run all tests (headless)
+npm run test:e2e
+
+# Run tests with visible browser
+npm run test:e2e:headed
+```
+
+From the `e2e` directory:
+
+```bash
+# Run specific feature
+npm exec -- cucumber-js tests/features/login.feature
+```
+
+### IDE Setup (VS Code/Cursor)
+
+The project root `.vscode` folder is configured for:
+- **Ctrl+Click navigation** from feature files to step definitions
+- **Cucumber language support** for `.feature` files
+- **Auto-completion** for step definitions
+- **Debug configuration** for Cucumber tests
+
+Required extensions:
+- **Cucumber (Gherkin) Full Support** (`cucumber.cucumber-official`)
+
+### Configuration
+
+**Environment Variables:**
+- `BASE_URL`: Base URL for the application (default: http://localhost:5173)
+- `HEADLESS`: Set to `false` to see the browser
+- `SLOW_MO`: Add delay between actions (milliseconds)
+
+### Test Reports
+
+Test results are generated in:
+- `e2e/test-results/`: Screenshots, videos, and JSON reports
+- `e2e/playwright-report/`: HTML test report
+- `e2e/test-results/cucumber-report.html`: Cucumber HTML report
+
+### Page Object Model (POM)
+
+The POM pattern is used to encapsulate page-specific logic:
+- **BasePage**: Common methods and helpers
+- **LoginPage**: Login page selectors and methods
+- **SignupPage**: Signup page selectors and methods
+
+### Locators
+
+Reusable selectors are organized in `e2e/tests/locators/`:
+- **CommonLocators**: Shared selectors (Ant Design inputs, buttons)
+- **LoginLocators**: Login page specific selectors
+- **SignupLocators**: Signup page specific selectors
+
+### BDD with Cucumber
+
+Tests are written in Gherkin syntax (`.feature` files) and implemented using step definitions:
+- **Features**: Business-readable scenarios
+- **Step Definitions**: Implementation in TypeScript (`auth.steps.ts`)

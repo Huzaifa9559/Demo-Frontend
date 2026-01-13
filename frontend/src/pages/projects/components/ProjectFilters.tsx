@@ -1,10 +1,8 @@
-import { memo, useEffect } from "react";
 import { Search, Dropdown } from "@components/ui";
 import {
   RANGE_OPTIONS,
   STATUS_OPTIONS,
-} from "@utils";
-import { useSearchParams } from "react-router-dom";
+} from "@/types";
 
 type ProjectFiltersProps = {
   className?: string;
@@ -20,23 +18,9 @@ const RANGE_DROPDOWN_OPTIONS = RANGE_OPTIONS.map((opt) => ({
   value: opt.value,
 }));
 
-export const ProjectFilters = memo(({
+export const ProjectFilters = ({
   className,
-}: ProjectFiltersProps = {}) => {
-  // const [searchParams, setSearchParams] = useSearchParams();
-  // useEffect(() => {
-  //   if (searchParams.has("status") && searchParams.has("range")) {
-  //     return;
-  //   }
-  //   setSearchParams((prev) => {
-  //     const newParams = new URLSearchParams(prev);
-  //     newParams.set("status", "all");
-  //     newParams.set("range", "quarter");
-  //     return newParams;
-  //   });
-  // }, []);
-
-  console.log("hello");
+}: ProjectFiltersProps) => {
   return (  
     <div
       className={`flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between ${
@@ -64,4 +48,4 @@ export const ProjectFilters = memo(({
       </div>
     </div>
   );
-});
+};

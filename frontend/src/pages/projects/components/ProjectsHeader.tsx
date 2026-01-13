@@ -1,26 +1,38 @@
-import { Header } from "@components/ui";
+import { Header, Button } from "@components/ui";
+import { PlusOutlined } from "@ant-design/icons";
 import { useProjectsContext } from "../context/ProjectsContext";
+import { RANGE_OPTIONS } from "@/types";
+import { useAppSelector } from "@/store";
+
 type ProjectsHeaderProps = {
   className?: string;
 };
 
 export const ProjectsHeader = ({ className }: ProjectsHeaderProps) => {
-  const { headerProps } = useProjectsContext();
+  const { projectsCount, rangeFilter, openCreateForm } = useProjectsContext();
+  const authState = useAppSelector((state) => state.auth);
+  const user = authState?.user || null;
+  const focusWindow = RANGE_OPTIONS.find((option) => option.value === rangeFilter)?.label;
+
   return (
     <Header className={className}>
       <Header.Content>
-        {headerProps.label && (
-          <Header.Label>{headerProps.label}</Header.Label>
-        )}
-        <Header.Title>{headerProps.title}</Header.Title>
-        {(headerProps.subtitle || headerProps.subtitleSuffix) && (
-          <Header.Subtitle suffix={headerProps.subtitleSuffix}>
-            {headerProps.subtitle}
+        <Header.Label>Overview</Header.Label>
+        <Header.Title>
+          {`Projects overview (${projectsCount})`}
+        </Header.Title>
+        {((`Tracking ${projectsCount} initiatives`) || focusWindow) && (
+          <Header.Subtitle suffix={focusWindow ? `Focus on ${focusWindow}` : undefined}>
+            {`Tracking ${projectsCount} initiatives`}
           </Header.Subtitle>
         )}
       </Header.Content>
-      {headerProps.actions && headerProps.actionsAllowed && (
-        <Header.Actions>{headerProps.actions}</Header.Actions>
+      {user?.role === 'admin' && (
+        <Header.Actions>
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateForm}>
+            New Project
+          </Button>
+        </Header.Actions>
       )}
     </Header>
   );

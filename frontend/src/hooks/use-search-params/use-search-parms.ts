@@ -24,5 +24,22 @@ export const useSearchParamsUtility = () => {
         setSearchParams(new URLSearchParams());
     }, [setSearchParams]);
 
-    return { getFilterParam, setFilterParams, resetFilterParams };
+    const initializeParams = useCallback((defaultParams: Record<string, string>) => {
+        setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            let hasChanges = false;
+
+            Object.entries(defaultParams).forEach(([key, defaultValue]) => {
+                if (!newParams.has(key)) {
+                    newParams.set(key, defaultValue);
+                    hasChanges = true;
+                }
+            });
+
+            // Only return new params if there were changes to avoid unnecessary re-renders
+            return hasChanges ? newParams : prev;
+        });
+    }, [setSearchParams]);
+
+    return { getFilterParam, setFilterParams, resetFilterParams, initializeParams };
 };

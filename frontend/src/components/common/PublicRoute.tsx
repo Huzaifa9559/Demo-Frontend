@@ -3,7 +3,8 @@ import { useAppSelector } from "@/store";
 import { ROUTE_URLS } from "@utils";
 
 export const PublicRoute = () => {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { isAuthenticated = false } = authState || {};
   const location = useLocation();
 
   // Redirect to home if already authenticated

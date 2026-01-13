@@ -6,13 +6,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { LoginDto } from './dto/login.dto';
-import { SignupDto } from './dto/signup.dto';
-import {
-  RequestOtpDto,
-  VerifyOtpDto,
-  ResetPasswordDto,
-} from './dto/forget-password.dto';
+import { UserRole } from '../users/entities/user.entity';
+import { LoginInput, SignupInput, AuthPayload } from './auth.graphql.types';
 import * as bcrypt from 'bcrypt';
 import { CurrentUserPayload } from '../common/decorators/current-user.decorator';
 
@@ -23,8 +18,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginDto) {
-    const user = await this.usersService.findByEmail(loginDto.email);
+  async login(input: LoginInput): Promise<AuthPayload> {
+    const user = await this.usersService.findByEmail(input.email);
 
     if (!user) {
       throw new UnauthorizedException(
@@ -33,7 +28,7 @@ export class AuthService {
     }
 
     const isPasswordValid = await bcrypt.compare(
-      loginDto.password,
+      input.password,
       user.password,
     );
 
@@ -52,14 +47,19 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
+    // Map entity UserRole to GraphQL UserRole
+    const graphqlRole = user.role === UserRole.ADMIN ? 'admin' : 'user';
+
     return {
+      token,
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: graphqlRole,
+        createdAt: user.createdAt || undefined,
+        updatedAt: user.updatedAt || undefined,
       },
-      token,
     };
   }
 
@@ -77,18 +77,22 @@ export class AuthService {
     };
   }
 
-  async signup(signupDto: SignupDto) {
-    const existingUser = await this.usersService.findByEmail(signupDto.email);
+  async signup(input: SignupInput): Promise<AuthPayload> {
+    const existingUser = await this.usersService.findByEmail(input.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(signupDto.password, 10);
+    const hashedPassword = await bcrypt.hash(input.password, 10);
+
+    // Map GraphQL UserRole to entity UserRole
+    const entityRole = input.role === 'admin' ? UserRole.ADMIN : UserRole.USER;
 
     const user = await this.usersService.create({
-      email: signupDto.email,
+      email: input.email,
       password: hashedPassword,
-      name: signupDto.name,
+      name: input.name,
+      role: entityRole,
     });
 
     const payload: CurrentUserPayload = {
@@ -100,19 +104,24 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
+    // Map entity UserRole to GraphQL UserRole
+    const graphqlRole = user.role === UserRole.ADMIN ? 'admin' : 'user';
+
     return {
+      token,
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: graphqlRole,
+        createdAt: user.createdAt || undefined,
+        updatedAt: user.updatedAt || undefined,
       },
-      token,
     };
   }
 
-  async requestOtp(requestOtpDto: RequestOtpDto) {
-    const user = await this.usersService.findByEmail(requestOtpDto.email);
+  async requestOtp(input: { email: string }) {
+    const user = await this.usersService.findByEmail(input.email);
     if (!user) {
       throw new UnauthorizedException('User with this email does not exist');
     }
@@ -142,8 +151,8 @@ export class AuthService {
     };
   }
 
-  async verifyOtp(verifyOtpDto: VerifyOtpDto) {
-    const user = await this.usersService.findByEmail(verifyOtpDto.email);
+  async verifyOtp(input: { email: string; otp: string }) {
+    const user = await this.usersService.findByEmail(input.email);
     if (!user) {
       throw new UnauthorizedException('User with this email does not exist');
     }
@@ -158,7 +167,7 @@ export class AuthService {
       );
     }
 
-    if (user.otp !== verifyOtpDto.otp) {
+    if (user.otp !== input.otp) {
       throw new UnauthorizedException('Invalid OTP');
     }
 
@@ -167,8 +176,8 @@ export class AuthService {
     };
   }
 
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const user = await this.usersService.findByEmail(resetPasswordDto.email);
+  async resetPassword(input: { email: string; otp: string; newPassword: string }) {
+    const user = await this.usersService.findByEmail(input.email);
     if (!user) {
       throw new UnauthorizedException('User with this email does not exist');
     }
@@ -183,11 +192,11 @@ export class AuthService {
       );
     }
 
-    if (user.otp !== resetPasswordDto.otp) {
+    if (user.otp !== input.otp) {
       throw new UnauthorizedException('Invalid OTP');
     }
 
-    const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+    const hashedPassword = await bcrypt.hash(input.newPassword, 10);
 
     await this.usersService.update(user.id, {
       password: hashedPassword,

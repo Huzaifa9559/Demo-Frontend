@@ -1,0 +1,18 @@
+"""
+User role enum
+"""
+enum UserRole {
+  admin
+  user
+}
+
+type User {
+  id: String!
+  email: String!
+  name: String!
+  role: UserRole!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+

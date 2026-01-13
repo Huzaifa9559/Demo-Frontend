@@ -4,15 +4,19 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProjectsModule } from './projects/projects.module';
+import { ResourcesModule } from './resources/resources.module';
+import { GraphqlModule } from './graphql/graphql.module';
 import { LoggingMiddleware } from './common/middlewares/logging.middleware';
 
 @Module({
   imports: [
     ConfigModule,
     DatabaseModule,
+    GraphqlModule,
     UsersModule,
     AuthModule,
     ProjectsModule,
+    ResourcesModule,
   ],
 })
 export class AppModule implements NestModule {

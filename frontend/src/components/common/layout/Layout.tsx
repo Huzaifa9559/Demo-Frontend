@@ -9,7 +9,8 @@ import type { SideBarTab } from "./layout-utility";
 
 export const Layout = () => {
   const { location } = useNavigation();
-  const { user } = useAppSelector((state) => state.auth);
+  const authState = useAppSelector((state) => state.auth);
+  const { user = null } = authState || {};
 
   // Filter sidebar tabs based on user role
   const filteredSideBarTabs = useMemo(() => {
@@ -23,21 +24,23 @@ export const Layout = () => {
     });
   }, [user]);
 
-  const getInitialActiveTab = useCallback(() => {
+  const getInitialActiveTab = useCallback((): SideBarTab | null => {
+    if (filteredSideBarTabs.length === 0) return null;
     return (
       filteredSideBarTabs.find((tab) => location.pathname.startsWith(tab.url)) ??
-      filteredSideBarTabs[0]
+      filteredSideBarTabs[0] ??
+      null
     );
   }, [location.pathname, filteredSideBarTabs]);
 
-  const [activeTab, setActiveTab] = useState<SideBarTab | null>(null);
+  const [activeTab, setActiveTab] = useState<SideBarTab | null>(() => getInitialActiveTab());
 
   useEffect(() => {
-    if (filteredSideBarTabs.length > 0) {
-      const newActiveTab = getInitialActiveTab();
+    const newActiveTab = getInitialActiveTab();
+    if (newActiveTab) {
       setActiveTab(newActiveTab);
     }
-  }, [getInitialActiveTab, filteredSideBarTabs]);
+  }, [getInitialActiveTab]);
 
   if (!activeTab || filteredSideBarTabs.length === 0) {
     return null;
@@ -50,8 +53,8 @@ export const Layout = () => {
         setActiveTab={setActiveTab}
         sideBarTabs={filteredSideBarTabs}
       />
-      <div className="flex-1 flex flex-col">
-        <main className="flex flex-col m-4 gap-4 overflow-auto sm:overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex flex-col m-4 gap-4 overflow-auto">
           <Outlet />
         </main>
       </div>

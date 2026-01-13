@@ -2,7 +2,6 @@ import {
   Space,
   Tag,
   Typography,
-  type TablePaginationConfig,
   type TableProps,
 } from "antd";
 import { Button, Table } from "@components/ui";
@@ -10,6 +9,7 @@ import { useMemo } from "react";
 import type { ProjectRecord } from "@/types";
 import { useProjectsContext } from "../context/ProjectsContext";
 import { useAppSelector } from "@/store";
+import { PROJECT_STATUS_COLORS } from "@/types";
 
 type ProjectTableProps = {
   className?: string;
@@ -17,8 +17,7 @@ type ProjectTableProps = {
 
 export const ProjectTable = ({ className }: ProjectTableProps) => {
   const {
-    filteredProjects,
-    statusColors,
+    projects,
     onTableChange,
     openDetails,
     openEditForm,
@@ -28,10 +27,10 @@ export const ProjectTable = ({ className }: ProjectTableProps) => {
 
   const tablePagination = {
     ...pagination,
-    total: pagination.total ?? filteredProjects.length,
   };
 
-  const user=useAppSelector((state) => state.auth.user);
+  const authState = useAppSelector((state) => state.auth);
+  const user = authState?.user || null;
 
 
   const columns: TableProps<ProjectRecord>["columns"] = useMemo(
@@ -76,7 +75,7 @@ export const ProjectTable = ({ className }: ProjectTableProps) => {
         width: 160,
         sorter: (a, b) => a.status.localeCompare(b.status),
         render: (status: ProjectRecord["status"]) => (
-          <Tag color={statusColors[status] ?? "default"}>{status}</Tag>
+          <Tag color={PROJECT_STATUS_COLORS[status] ?? "default"}>{status}</Tag>
         ),
       },
       {
@@ -122,13 +121,13 @@ export const ProjectTable = ({ className }: ProjectTableProps) => {
         ),
       },
     ],
-    [openEditForm, openDetails, statusColors]
+    [openEditForm, openDetails]
   );
 
   return (
     <Table
       columns={columns}
-      dataSource={filteredProjects}
+      dataSource={projects}
       loading={isLoading}
       pagination={tablePagination}
       className={className}

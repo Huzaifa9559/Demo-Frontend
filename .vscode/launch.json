@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Cucumber Tests",
+      "program": "${workspaceFolder}/frontend/e2e/run-tests.ts",
+      "outFiles": ["${workspaceFolder}/frontend/e2e/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  ]
+}

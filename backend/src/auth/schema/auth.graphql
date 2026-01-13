@@ -1,0 +1,80 @@
+# Scalars used by auth module
+scalar DateTime
+scalar Email
+scalar NonEmptyString
+scalar Password
+
+# User role enum
+enum UserRole {
+  admin
+  user
+}
+
+# User type
+type User {
+  id: String!
+  email: String!
+  name: String!
+  role: UserRole!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+# Auth module types
+input SignupInput {
+  email: Email!
+  password: Password!
+  name: NonEmptyString!
+  role: UserRole!
+}
+
+input LoginInput {
+  email: Email!
+  password: NonEmptyString!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type Query {
+  me: User!
+}
+
+input RequestOtpInput {
+  email: Email!
+}
+
+type RequestOtpResponse {
+  message: String!
+  otp: String
+}
+
+input VerifyOtpInput {
+  email: Email!
+  otp: NonEmptyString!
+}
+
+type VerifyOtpResponse {
+  message: String!
+}
+
+input ResetPasswordInput {
+  email: Email!
+  otp: NonEmptyString!
+  newPassword: Password!
+}
+
+type ResetPasswordResponse {
+  message: String!
+}
+
+type Mutation {
+  signup(input: SignupInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  requestOtp(input: RequestOtpInput!): RequestOtpResponse!
+  verifyOtp(input: VerifyOtpInput!): VerifyOtpResponse!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordResponse!
+}
+

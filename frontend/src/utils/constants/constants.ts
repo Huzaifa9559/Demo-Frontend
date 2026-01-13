@@ -20,22 +20,6 @@ export const SORT_ORDER = {
   DESC: "desc",
 } as const;
 
-export type StatusFilter = "all" | "active" | "hold" | "completed" | "blocked";
-export type RangeFilter = "week" | "month" | "quarter";
-
-export const STATUS_OPTIONS = [
-  { label: "All Status", value: "all" },
-  { label: "In Progress", value: "active" },
-  { label: "On Hold", value: "hold" },
-  { label: "Completed", value: "completed" },
-  { label: "Blocked", value: "blocked" },
-] as const;
-
-export const RANGE_OPTIONS = [
-  { label: "This Week", value: "week" },
-  { label: "This Month", value: "month" },
-  { label: "This Quarter", value: "quarter" },
-] as const;
 
 export const SOMETHING_WENT_WRONG = "An unexpected error occurred. Please try again later.";
 export const UNABLE_TO_FIND = "The requested resource could not be found. Please verify your information and try again.";
