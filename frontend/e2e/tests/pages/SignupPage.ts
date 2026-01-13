@@ -1,76 +1,73 @@
-import { Page, Locator } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { SignupLocators } from '../locators/signup.locators';
 
 /**
  * Signup Page Object Model
  * Contains all selectors and methods for the Signup page
  */
 export class SignupPage extends BasePage {
-  // Selectors
-  readonly nameInput: Locator;
-  readonly emailInput: Locator;
-  readonly passwordInput: Locator;
-  readonly confirmPasswordInput: Locator;
-  readonly signupButton: Locator;
-  readonly loginLink: Locator;
-  readonly errorMessage: Locator;
-  readonly formTitle: Locator;
+  readonly locators: SignupLocators;
+
+  // Expose locators for easy access
+  get nameInput() { return this.locators.nameInput; }
+  get emailInput() { return this.locators.emailInput; }
+  get passwordInput() { return this.locators.passwordInput; }
+  get confirmPasswordInput() { return this.locators.confirmPasswordInput; }
+  get signupButton() { return this.locators.signupButton; }
+  get loginLink() { return this.locators.loginLink; }
+  get errorMessage() { return this.locators.errorMessage; }
+  get formTitle() { return this.locators.formTitle; }
 
   constructor(page: Page) {
     super(page);
-    
-    // Initialize locators
-    this.nameInput = page.locator('input[name="name"]');
-    this.emailInput = page.locator('input[name="email"]');
-    this.passwordInput = page.locator('input[name="password"]');
-    this.confirmPasswordInput = page.locator('input[name="confirmPassword"]');
-    this.signupButton = page.locator('button[type="submit"]');
-    this.loginLink = page.locator('a[href="/login"]');
-    this.errorMessage = page.locator('.text-red-600');
-    this.formTitle = page.locator('h1:has-text("Sign Up")');
+    this.locators = new SignupLocators(page);
   }
 
   /**
    * Navigate to signup page
    */
   async goto(): Promise<void> {
-    await this.page.goto('/signup');
-    await this.waitForLoad();
+    await this.page.goto('/signup', { waitUntil: 'networkidle' });
+    // Wait for the form to be ready
+    await this.formTitle.waitFor({ state: 'visible', timeout: 15000 });
+    // Wait for at least one input to be visible (Ant Design might take time to render)
+    await this.page.waitForSelector('input.ant-input, #signup_name, input[type="text"]', { state: 'visible', timeout: 15000 });
   }
 
   /**
    * Fill name input
    */
   async fillName(name: string): Promise<void> {
-    await this.nameInput.fill(name);
+    await this.fillInput(this.nameInput, name);
   }
 
   /**
    * Fill email input
    */
   async fillEmail(email: string): Promise<void> {
-    await this.emailInput.fill(email);
+    await this.fillInput(this.emailInput, email);
   }
 
   /**
    * Fill password input
    */
   async fillPassword(password: string): Promise<void> {
-    await this.passwordInput.fill(password);
+    await this.fillInput(this.passwordInput, password);
   }
 
   /**
    * Fill confirm password input
    */
   async fillConfirmPassword(password: string): Promise<void> {
-    await this.confirmPasswordInput.fill(password);
+    await this.fillInput(this.confirmPasswordInput, password);
   }
 
   /**
    * Click signup button
    */
   async clickSignupButton(): Promise<void> {
-    await this.signupButton.click();
+    await this.clickAndWaitForResponse(this.signupButton);
   }
 
   /**
@@ -102,7 +99,7 @@ export class SignupPage extends BasePage {
    * Check if error message is visible
    */
   async isErrorMessageVisible(): Promise<boolean> {
-    return await this.errorMessage.isVisible();
+    return await super.isErrorMessageVisible();
   }
 
   /**
@@ -122,71 +119,31 @@ export class SignupPage extends BasePage {
   }
 
   /**
-   * Get validation error for name field
+   * Get validation error for name field (first field, index 0)
    */
   async getNameValidationError(): Promise<string | null> {
-    const nameField = this.nameInput.locator('..').locator('..'); // Go up to form-item
-    const errorLocator = nameField.locator('.ant-form-item-explain-error');
-    if (await errorLocator.isVisible().catch(() => false)) {
-      return await errorLocator.textContent();
-    }
-    const allErrors = this.page.locator('.ant-form-item-explain-error');
-    const count = await allErrors.count();
-    if (count > 0) {
-      return await allErrors.first().textContent();
-    }
-    return null;
+    return await this.getFormFieldValidationError(0);
   }
 
   /**
-   * Get validation error for email field
+   * Get validation error for email field (second field, index 1)
    */
   async getEmailValidationError(): Promise<string | null> {
-    const emailField = this.emailInput.locator('..').locator('..'); // Go up to form-item
-    const errorLocator = emailField.locator('.ant-form-item-explain-error');
-    if (await errorLocator.isVisible().catch(() => false)) {
-      return await errorLocator.textContent();
-    }
-    const allErrors = this.page.locator('.ant-form-item-explain-error');
-    const count = await allErrors.count();
-    if (count > 1) {
-      return await allErrors.nth(1).textContent();
-    }
-    return null;
+    return await this.getFormFieldValidationError(1);
   }
 
   /**
-   * Get validation error for password field
+   * Get validation error for password field (third field, index 2)
    */
   async getPasswordValidationError(): Promise<string | null> {
-    const passwordField = this.passwordInput.locator('..').locator('..'); // Go up to form-item
-    const errorLocator = passwordField.locator('.ant-form-item-explain-error');
-    if (await errorLocator.isVisible().catch(() => false)) {
-      return await errorLocator.textContent();
-    }
-    const allErrors = this.page.locator('.ant-form-item-explain-error');
-    const count = await allErrors.count();
-    if (count > 2) {
-      return await allErrors.nth(2).textContent();
-    }
-    return null;
+    return await this.getFormFieldValidationError(2);
   }
 
   /**
-   * Get validation error for confirm password field
+   * Get validation error for confirm password field (fourth field, index 3)
    */
   async getConfirmPasswordValidationError(): Promise<string | null> {
-    const confirmPasswordField = this.confirmPasswordInput.locator('..').locator('..'); // Go up to form-item
-    const errorLocator = confirmPasswordField.locator('.ant-form-item-explain-error');
-    if (await errorLocator.isVisible().catch(() => false)) {
-      return await errorLocator.textContent();
-    }
-    const allErrors = this.page.locator('.ant-form-item-explain-error');
-    const count = await allErrors.count();
-    if (count > 3) {
-      return await allErrors.nth(3).textContent();
-    }
-    return null;
+    return await this.getFormFieldValidationError(3);
   }
 }
 

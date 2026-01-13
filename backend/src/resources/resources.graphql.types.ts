@@ -87,6 +87,11 @@ export type Resource = {
   url: Scalars['String']['output'];
 };
 
+export type ResourceSortBy =
+  | 'createdAt'
+  | 'title'
+  | 'type';
+
 /** Resource status enum */
 export type ResourceStatus =
   | 'active'
@@ -100,11 +105,6 @@ export type ResourceType =
   | 'link'
   | 'other'
   | 'video';
-
-export type ResourceSortBy =
-  | 'createdAt'
-  | 'title'
-  | 'type';
 
 export type ResourcesOutput = {
   data: Array<Resource>;

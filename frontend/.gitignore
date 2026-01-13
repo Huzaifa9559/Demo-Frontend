@@ -13,6 +13,8 @@ dist-ssr
 *.local
 
 # Editor directories and files
+.vscode/*
+!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -21,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# E2E Test Results
+e2e/test-results/
+e2e/playwright-report/
+e2e/playwright/.cache/

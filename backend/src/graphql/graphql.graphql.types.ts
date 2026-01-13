@@ -33,6 +33,17 @@ export type CreateProjectInput = {
   tickets: Scalars['NonNegativeInt']['input'];
 };
 
+export type CreateResourceInput = {
+  author?: InputMaybe<Scalars['String']['input']>;
+  category?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<ResourceStatus>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  title: Scalars['NonEmptyString']['input'];
+  type: ResourceType;
+  url: Scalars['NonEmptyString']['input'];
+};
+
 export type LoginInput = {
   email: Scalars['Email']['input'];
   password: Scalars['NonEmptyString']['input'];
@@ -40,12 +51,15 @@ export type LoginInput = {
 
 export type Mutation = {
   createProject: Project;
+  createResource: Resource;
   deleteProject: Scalars['Boolean']['output'];
+  deleteResource: Scalars['Boolean']['output'];
   login: AuthPayload;
   requestOtp: RequestOtpResponse;
   resetPassword: ResetPasswordResponse;
   signup: AuthPayload;
   updateProject: Project;
+  updateResource: Resource;
   verifyOtp: VerifyOtpResponse;
 };
 
@@ -55,7 +69,17 @@ export type MutationCreateProjectArgs = {
 };
 
 
+export type MutationCreateResourceArgs = {
+  input: CreateResourceInput;
+};
+
+
 export type MutationDeleteProjectArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteResourceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -83,6 +107,12 @@ export type MutationSignupArgs = {
 export type MutationUpdateProjectArgs = {
   id: Scalars['ID']['input'];
   input: UpdateProjectInput;
+};
+
+
+export type MutationUpdateResourceArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateResourceInput;
 };
 
 
@@ -137,6 +167,8 @@ export type Query = {
   me: User;
   project: Project;
   projects: ProjectsOutput;
+  resource: Resource;
+  resources: ResourcesOutput;
 };
 
 
@@ -147,6 +179,16 @@ export type QueryProjectArgs = {
 
 export type QueryProjectsArgs = {
   input?: InputMaybe<ProjectsQueryInput>;
+};
+
+
+export type QueryResourceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryResourcesArgs = {
+  input?: InputMaybe<ResourcesQueryInput>;
 };
 
 export type RequestOtpInput = {
@@ -168,12 +210,66 @@ export type ResetPasswordResponse = {
   message: Scalars['String']['output'];
 };
 
+export type Resource = {
+  author?: Maybe<Scalars['String']['output']>;
+  category?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  key: Scalars['ID']['output'];
+  status: ResourceStatus;
+  tags: Array<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+  type: ResourceType;
+  updatedAt: Scalars['DateTime']['output'];
+  url: Scalars['String']['output'];
+};
+
+export type ResourceSortBy =
+  | 'createdAt'
+  | 'title'
+  | 'type';
+
+/** Resource status enum */
+export type ResourceStatus =
+  | 'active'
+  | 'archived';
+
+/** Resource type enum */
+export type ResourceType =
+  | 'document'
+  | 'file'
+  | 'image'
+  | 'link'
+  | 'other'
+  | 'video';
+
+export type ResourcesOutput = {
+  data: Array<Resource>;
+  meta: PaginationMeta;
+};
+
+export type ResourcesQueryInput = {
+  category?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<ResourceSortBy>;
+  sortOrder?: InputMaybe<SortOrder>;
+  status?: InputMaybe<ResourceStatus>;
+  tag?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<ResourceType>;
+};
+
 export type SignupInput = {
   email: Scalars['Email']['input'];
   name: Scalars['NonEmptyString']['input'];
   password: Scalars['Password']['input'];
   role: UserRole;
 };
+
+export type SortOrder =
+  | 'asc'
+  | 'desc';
 
 export type UpdateProjectInput = {
   dueDate?: InputMaybe<Scalars['DateTime']['input']>;
@@ -182,6 +278,17 @@ export type UpdateProjectInput = {
   projectCode?: InputMaybe<Scalars['NonEmptyString']['input']>;
   status?: InputMaybe<ProjectStatus>;
   tickets?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+};
+
+export type UpdateResourceInput = {
+  author?: InputMaybe<Scalars['String']['input']>;
+  category?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<ResourceStatus>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  title?: InputMaybe<Scalars['NonEmptyString']['input']>;
+  type?: InputMaybe<ResourceType>;
+  url?: InputMaybe<Scalars['NonEmptyString']['input']>;
 };
 
 export type User = {

@@ -1,5 +1,8 @@
-import { Before, After, BeforeAll, AfterAll, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
+import { Before, After, BeforeAll, AfterAll, setWorldConstructor, IWorldOptions, setDefaultTimeout } from '@cucumber/cucumber';
 import { chromium, Browser, BrowserContext, Page } from '@playwright/test';
+
+// Set default timeout for steps (30 seconds)
+setDefaultTimeout(30 * 1000);
 
 let browser: Browser;
 let context: BrowserContext;
@@ -22,24 +25,39 @@ setWorldConstructor(CustomWorld);
 
 BeforeAll(async function () {
   // Launch browser before all tests
+  // Default to headless mode (browser runs in background, no visible window)
+  // Set HEADLESS=false to see the browser (useful for debugging)
+  
+  // Determine headless mode:
+  // - If HEADLESS is explicitly set to 'false', run in headed mode (visible)
+  // - Otherwise, run in headless mode (hidden)
+  const isHeadless = process.env.HEADLESS !== 'false';
+  
   browser = await chromium.launch({
-    headless: process.env.CI === 'true' || process.env.HEADLESS === 'true',
+    headless: isHeadless,
     slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO) : 0,
   });
+  
+  if (!isHeadless) {
+    console.log('🌐 Browser is running in headed mode (visible). Tests will run automatically - no manual interaction needed!');
+  } else {
+    console.log('🔇 Browser is running in headless mode (hidden). Use "npm run test:headed" to see the browser.');
+  }
 });
 
 Before(async function (this: CustomWorld) {
+  // Set base URL
+  const baseURL = process.env.BASE_URL || 'http://localhost:5173';
+  
   // Create a new context and page for each scenario
   context = await browser.newContext({
+    baseURL: baseURL,
     viewport: { width: 1280, height: 720 },
     recordVideo: {
       dir: 'test-results/videos/',
     },
   });
   page = await context.newPage();
-  
-  // Set base URL
-  const baseURL = process.env.BASE_URL || 'http://localhost:5173';
   
   // Attach page to world context
   this.page = page;

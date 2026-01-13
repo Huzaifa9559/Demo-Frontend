@@ -9,7 +9,7 @@
         "-r",
         "-n",
         "${input:stepText}",
-        "tests/step-definitions"
+        "frontend/e2e/tests/step-definitions"
       ],
       "problemMatcher": []
     }

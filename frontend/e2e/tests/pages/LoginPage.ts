@@ -1,60 +1,58 @@
-import { Page, Locator } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { LoginLocators } from '../locators/login.locators';
 
 /**
  * Login Page Object Model
  * Contains all selectors and methods for the Login page
  */
 export class LoginPage extends BasePage {
-  // Selectors
-  readonly emailInput: Locator;
-  readonly passwordInput: Locator;
-  readonly loginButton: Locator;
-  readonly signupLink: Locator;
-  readonly forgetPasswordLink: Locator;
-  readonly errorMessage: Locator;
-  readonly formTitle: Locator;
+  readonly locators: LoginLocators;
+
+  // Expose locators for easy access
+  get emailInput() { return this.locators.emailInput; }
+  get passwordInput() { return this.locators.passwordInput; }
+  get loginButton() { return this.locators.loginButton; }
+  get signupLink() { return this.locators.signupLink; }
+  get forgetPasswordLink() { return this.locators.forgetPasswordLink; }
+  get errorMessage() { return this.locators.errorMessage; }
+  get formTitle() { return this.locators.formTitle; }
 
   constructor(page: Page) {
     super(page);
-    
-    // Initialize locators
-    this.emailInput = page.locator('input[name="email"]');
-    this.passwordInput = page.locator('input[name="password"]');
-    this.loginButton = page.locator('button[type="submit"]');
-    this.signupLink = page.locator('a[href="/signup"]');
-    this.forgetPasswordLink = page.locator('a[href="/forget-password"]');
-    this.errorMessage = page.locator('.text-red-600');
-    this.formTitle = page.locator('h1:has-text("Login")');
+    this.locators = new LoginLocators(page);
   }
 
   /**
    * Navigate to login page
    */
   async goto(): Promise<void> {
-    await this.page.goto('/login');
-    await this.waitForLoad();
+    await this.page.goto('/login', { waitUntil: 'networkidle' });
+    // Wait for the form to be ready
+    await this.formTitle.waitFor({ state: 'visible', timeout: 15000 });
+    // Wait for at least one input to be visible (Ant Design might take time to render)
+    await this.page.waitForSelector('input.ant-input, #login_email, input[type="email"]', { state: 'visible', timeout: 15000 });
   }
 
   /**
    * Fill email input
    */
   async fillEmail(email: string): Promise<void> {
-    await this.emailInput.fill(email);
+    await this.fillInput(this.emailInput, email);
   }
 
   /**
    * Fill password input
    */
   async fillPassword(password: string): Promise<void> {
-    await this.passwordInput.fill(password);
+    await this.fillInput(this.passwordInput, password);
   }
 
   /**
    * Click login button
    */
   async clickLoginButton(): Promise<void> {
-    await this.loginButton.click();
+    await this.clickAndWaitForResponse(this.loginButton);
   }
 
   /**
@@ -91,7 +89,7 @@ export class LoginPage extends BasePage {
    * Check if error message is visible
    */
   async isErrorMessageVisible(): Promise<boolean> {
-    return await this.errorMessage.isVisible();
+    return await super.isErrorMessageVisible();
   }
 
   /**
@@ -111,44 +109,17 @@ export class LoginPage extends BasePage {
   }
 
   /**
-   * Get validation error for email field
+   * Get validation error for email field (first field, index 0)
    */
   async getEmailValidationError(): Promise<string | null> {
-    // Ant Design form validation errors
-    const emailField = this.emailInput.locator('..').locator('..'); // Go up to form-item
-    const errorLocator = emailField.locator('.ant-form-item-explain-error');
-    if (await errorLocator.isVisible().catch(() => false)) {
-      return await errorLocator.textContent();
-    }
-    // Fallback: check for any validation error near email field
-    const allErrors = this.page.locator('.ant-form-item-explain-error');
-    const count = await allErrors.count();
-    if (count > 0) {
-      return await allErrors.first().textContent();
-    }
-    return null;
+    return await this.getFormFieldValidationError(0);
   }
 
   /**
-   * Get validation error for password field
+   * Get validation error for password field (second field, index 1)
    */
   async getPasswordValidationError(): Promise<string | null> {
-    // Ant Design form validation errors
-    const passwordField = this.passwordInput.locator('..').locator('..'); // Go up to form-item
-    const errorLocator = passwordField.locator('.ant-form-item-explain-error');
-    if (await errorLocator.isVisible().catch(() => false)) {
-      return await errorLocator.textContent();
-    }
-    // Fallback: check for any validation error near password field
-    const allErrors = this.page.locator('.ant-form-item-explain-error');
-    const count = await allErrors.count();
-    if (count > 1) {
-      return await allErrors.nth(1).textContent();
-    } else if (count === 1) {
-      // If only one error, it might be for password
-      return await allErrors.first().textContent();
-    }
-    return null;
+    return await this.getFormFieldValidationError(1);
   }
 }
 

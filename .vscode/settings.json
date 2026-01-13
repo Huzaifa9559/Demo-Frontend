@@ -1,0 +1,35 @@
+{
+  "files.associations": {
+    "*.feature": "gherkin",
+    "**/*.feature": "gherkin"
+  },
+  "cucumber.features": [
+    "frontend/e2e/tests/features/**/*.feature",
+    "e2e/tests/features/**/*.feature"
+  ],
+  "cucumber.glue": [
+    "frontend/e2e/tests/step-definitions/**/*.ts",
+    "e2e/tests/step-definitions/**/*.ts"
+  ],
+  "cucumber.stepDefinitions": [
+    "frontend/e2e/tests/step-definitions/**/*.ts",
+    "e2e/tests/step-definitions/**/*.ts"
+  ],
+  "cucumber.stepDefinitionsPatterns": [
+    "**/*.ts"
+  ],
+  "cucumberautocomplete.steps": [
+    "frontend/e2e/tests/step-definitions/**/*.ts",
+    "e2e/tests/step-definitions/**/*.ts"
+  ],
+  "cucumberautocomplete.syncfeatures": "frontend/e2e/tests/features/**/*.feature",
+  "cucumberautocomplete.strictGherkinCompletion": true,
+  "cucumberautocomplete.gherkinDefinitionPart": "(Given|When|Then|And|But)",
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "cucumber.languageServer.enable": true,
+  "[gherkin]": {
+    "editor.defaultFormatter": "cucumber.cucumber-official"
+  }
+}

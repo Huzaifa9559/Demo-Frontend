@@ -1,3 +1,4 @@
+@signup
 Feature: User Signup
   As a new user
   I want to create an account
@@ -8,7 +9,7 @@ Feature: User Signup
 
   Scenario: Successful signup with valid credentials
     When I enter name "John Doe"
-    And I enter email "john.doe@example.com"
+    And I enter email "john.doe1234@example.com"
     And I enter password "password123"
     And I enter confirm password "password123"
     And I click the signup button

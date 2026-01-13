@@ -9,7 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "types": ["node", "@types/node", "@cucumber/cucumber", "@playwright/test"],
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./tests/*"]
@@ -18,7 +18,8 @@
   "include": [
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "run-tests.ts"
+    "run-tests.ts",
+    "playwright.config.ts"
   ],
   "exclude": [
     "node_modules",
