@@ -1,0 +1,1 @@
+default: --require-module ts-node/register --require tests/utils/hooks.ts --require tests/step-definitions/**/*.ts

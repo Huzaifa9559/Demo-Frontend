@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Find Step Definition",
+      "type": "shell",
+      "command": "grep",
+      "args": [
+        "-r",
+        "-n",
+        "${input:stepText}",
+        "tests/step-definitions"
+      ],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "stepText",
+      "type": "promptString",
+      "description": "Enter step text to find"
+    }
+  ]
+}

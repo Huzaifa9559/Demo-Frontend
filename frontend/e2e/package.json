@@ -1,0 +1,19 @@
+{
+  "name": "e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests with BDD and POM",
+  "scripts": {
+    "test": "npm exec -- ts-node run-tests.ts",
+    "test:headed": "npm exec -- ts-node run-tests.ts"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "^10.0.0",
+    "@playwright/test": "^1.48.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
+
