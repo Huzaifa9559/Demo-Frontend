@@ -8,9 +8,11 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { ProjectsModule } from '../projects/projects.module';
 import { ResourcesModule } from '../resources/resources.module';
+import { ShopifyModule } from '../shopify/shopify.module';
 import { AuthResolver } from '../auth/auth.resolver';
 import { ProjectsResolver } from '../projects/projects.resolver';
 import { ResourcesResolver } from '../resources/resources.resolver';
+import { ShopifyResolver } from '../shopify/shopify.resolver';
 import {
   DateTimeScalar,
   EmailScalar,
@@ -75,11 +77,13 @@ import { GraphqlExceptionFilter } from '../common/filters/graphql-exception.filt
     UsersModule,
     ProjectsModule,
     ResourcesModule,
+    ShopifyModule,
   ],
   providers: [
     AuthResolver,
     ProjectsResolver,
     ResourcesResolver,
+    ShopifyResolver,
     DateTimeScalar,
     EmailScalar,
     NonEmptyStringScalar,

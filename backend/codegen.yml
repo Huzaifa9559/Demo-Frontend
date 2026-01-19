@@ -43,6 +43,16 @@ generates:
         DateTime: Date
         NonEmptyString: string
 
+  # Generate types for shopify module - only from shopify/schema/
+  src/shopify/shopify.graphql.types.ts:
+    schema:
+      - 'src/shopify/schema/**/*.graphql'
+    plugins:
+      - typescript
+    config:
+      enumsAsTypes: true
+      skipTypename: true
+
   # Generate shared types in graphql folder (for backward compatibility) - all schemas
   src/graphql/graphql.graphql.types.ts:
     schema:
@@ -51,6 +61,7 @@ generates:
       - 'src/auth/schema/**/*.graphql'
       - 'src/projects/schema/**/*.graphql'
       - 'src/resources/schema/**/*.graphql'
+      - 'src/shopify/schema/**/*.graphql'
     plugins:
       - typescript
     config:

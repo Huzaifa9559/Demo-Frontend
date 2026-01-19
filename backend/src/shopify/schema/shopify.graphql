@@ -1,0 +1,107 @@
+# Shopify module GraphQL schema
+
+type ShopifyProduct {
+  id: ID!
+  title: String!
+  handle: String!
+  status: String!
+  totalInventory: Int!
+  featuredImage: ShopifyProductImage
+  description: String
+  productType: String
+  vendor: String
+  tags: [String!]
+  createdAt: String
+  updatedAt: String
+}
+
+type ShopifyProductImage {
+  url: String!
+  altText: String
+}
+
+type ShopifyPageInfo {
+  hasNextPage: Boolean!
+  endCursor: String
+}
+
+type ShopifyProductEdge {
+  node: ShopifyProduct!
+}
+
+type ShopifyProductsConnection {
+  pageInfo: ShopifyPageInfo!
+  edges: [ShopifyProductEdge!]!
+}
+
+type ShopifyProductsListResponse {
+  products: ShopifyProductsConnection!
+}
+
+type ShopifyProductResponse {
+  product: ShopifyProduct!
+}
+
+input ShopifyProductsListInput {
+  shopDomain: String
+  first: Int
+  after: String
+}
+
+input ShopifyProductInput {
+  shopDomain: String
+  productId: ID!
+}
+
+input ShopifyProductsSearchInput {
+  shopDomain: String
+  query: String!
+  first: Int
+  after: String
+}
+
+input ShopifyCreateProductInput {
+  shopDomain: String
+  title: String!
+  handle: String
+  description: String
+  vendor: String
+  productType: String
+  tags: [String!]
+  status: String
+}
+
+input ShopifyUpdateProductInput {
+  shopDomain: String
+  productId: ID!
+  title: String
+  handle: String
+  description: String
+  vendor: String
+  productType: String
+  tags: [String!]
+  status: String
+}
+
+input ShopifyDeleteProductInput {
+  shopDomain: String
+  productId: ID!
+}
+
+type ShopifyMutationResponse {
+  success: Boolean!
+  message: String
+  product: ShopifyProduct
+}
+
+type Query {
+  shopifyProductsList(input: ShopifyProductsListInput!): ShopifyProductsListResponse!
+  shopifyProduct(input: ShopifyProductInput!): ShopifyProductResponse!
+  shopifyProductsSearch(input: ShopifyProductsSearchInput!): ShopifyProductsListResponse!
+}
+
+type Mutation {
+  shopifyCreateProduct(input: ShopifyCreateProductInput!): ShopifyMutationResponse!
+  shopifyUpdateProduct(input: ShopifyUpdateProductInput!): ShopifyMutationResponse!
+  shopifyDeleteProduct(input: ShopifyDeleteProductInput!): ShopifyMutationResponse!
+}

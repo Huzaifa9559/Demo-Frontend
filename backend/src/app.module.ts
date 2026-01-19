@@ -7,6 +7,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { ResourcesModule } from './resources/resources.module';
 import { GraphqlModule } from './graphql/graphql.module';
 import { LoggingMiddleware } from './common/middlewares/logging.middleware';
+import { ShopifyModule } from './shopify/shopify.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { LoggingMiddleware } from './common/middlewares/logging.middleware';
     AuthModule,
     ProjectsModule,
     ResourcesModule,
+    ShopifyModule,
   ],
 })
 export class AppModule implements NestModule {

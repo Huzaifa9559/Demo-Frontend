@@ -57,6 +57,9 @@ export type Mutation = {
   login: AuthPayload;
   requestOtp: RequestOtpResponse;
   resetPassword: ResetPasswordResponse;
+  shopifyCreateProduct: ShopifyMutationResponse;
+  shopifyDeleteProduct: ShopifyMutationResponse;
+  shopifyUpdateProduct: ShopifyMutationResponse;
   signup: AuthPayload;
   updateProject: Project;
   updateResource: Resource;
@@ -96,6 +99,21 @@ export type MutationRequestOtpArgs = {
 
 export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
+};
+
+
+export type MutationShopifyCreateProductArgs = {
+  input: ShopifyCreateProductInput;
+};
+
+
+export type MutationShopifyDeleteProductArgs = {
+  input: ShopifyDeleteProductInput;
+};
+
+
+export type MutationShopifyUpdateProductArgs = {
+  input: ShopifyUpdateProductInput;
 };
 
 
@@ -169,6 +187,9 @@ export type Query = {
   projects: ProjectsOutput;
   resource: Resource;
   resources: ResourcesOutput;
+  shopifyProduct: ShopifyProductResponse;
+  shopifyProductsList: ShopifyProductsListResponse;
+  shopifyProductsSearch: ShopifyProductsListResponse;
 };
 
 
@@ -189,6 +210,21 @@ export type QueryResourceArgs = {
 
 export type QueryResourcesArgs = {
   input?: InputMaybe<ResourcesQueryInput>;
+};
+
+
+export type QueryShopifyProductArgs = {
+  input: ShopifyProductInput;
+};
+
+
+export type QueryShopifyProductsListArgs = {
+  input: ShopifyProductsListInput;
+};
+
+
+export type QueryShopifyProductsSearchArgs = {
+  input: ShopifyProductsSearchInput;
 };
 
 export type RequestOtpInput = {
@@ -258,6 +294,100 @@ export type ResourcesQueryInput = {
   status?: InputMaybe<ResourceStatus>;
   tag?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<ResourceType>;
+};
+
+export type ShopifyCreateProductInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
+  productType?: InputMaybe<Scalars['String']['input']>;
+  shopDomain?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  title: Scalars['String']['input'];
+  vendor?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ShopifyDeleteProductInput = {
+  productId: Scalars['ID']['input'];
+  shopDomain?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ShopifyMutationResponse = {
+  message?: Maybe<Scalars['String']['output']>;
+  product?: Maybe<ShopifyProduct>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type ShopifyPageInfo = {
+  endCursor?: Maybe<Scalars['String']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+};
+
+export type ShopifyProduct = {
+  createdAt?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  featuredImage?: Maybe<ShopifyProductImage>;
+  handle: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  productType?: Maybe<Scalars['String']['output']>;
+  status: Scalars['String']['output'];
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  title: Scalars['String']['output'];
+  totalInventory: Scalars['Int']['output'];
+  updatedAt?: Maybe<Scalars['String']['output']>;
+  vendor?: Maybe<Scalars['String']['output']>;
+};
+
+export type ShopifyProductEdge = {
+  node: ShopifyProduct;
+};
+
+export type ShopifyProductImage = {
+  altText?: Maybe<Scalars['String']['output']>;
+  url: Scalars['String']['output'];
+};
+
+export type ShopifyProductInput = {
+  productId: Scalars['ID']['input'];
+  shopDomain?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ShopifyProductResponse = {
+  product: ShopifyProduct;
+};
+
+export type ShopifyProductsConnection = {
+  edges: Array<ShopifyProductEdge>;
+  pageInfo: ShopifyPageInfo;
+};
+
+export type ShopifyProductsListInput = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  shopDomain?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ShopifyProductsListResponse = {
+  products: ShopifyProductsConnection;
+};
+
+export type ShopifyProductsSearchInput = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
+  shopDomain?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ShopifyUpdateProductInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
+  productId: Scalars['ID']['input'];
+  productType?: InputMaybe<Scalars['String']['input']>;
+  shopDomain?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  vendor?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type SignupInput = {
